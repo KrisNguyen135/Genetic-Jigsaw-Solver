@@ -1,0 +1,7 @@
+# virtual environment
+bin/
+include/
+lib/
+share/
+pip-selfcheck.json
+pyvenv.cfg
