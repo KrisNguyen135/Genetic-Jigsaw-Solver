@@ -7,6 +7,7 @@
 # Future improvements
 
 - Implementing concurrency to improve execution time
+- Comparing between using grayscale and not using grayscale
 
 # References
 
