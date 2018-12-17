@@ -82,7 +82,7 @@ def generate_init_pop(piece_edges, n_segments, pop_size=100):
 def get_fitness(ind):
     return
 
-N_SEGMENTS = 2
+N_SEGMENTS = 3
 
 if __name__ == '__main__':
     # reading in an image
