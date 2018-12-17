@@ -46,7 +46,10 @@ def generate_puzzle(img, n_segments=5):
     return pieces
 
 # returns a random initial population
-# TODO: test
+# each individual contains a tuple of:
+# - piece edge vectors (x number of pieces)
+# - indices of the pieces in matrix format
+# - rotation of the pieces in matrix format
 def generate_init_pop(piece_edges, n_segments, pop_size=100):
     # indices to keep track of in each individual
     indices = np.arange(len(piece_edges))
@@ -55,18 +58,29 @@ def generate_init_pop(piece_edges, n_segments, pop_size=100):
     for i in range(pop_size):
         # shuffling the indices and creating an individual with shuffled edges
         shuffled_indices = np.random.permutation(indices)
-        #individual = np.array([skimage.transform.rotate(piece_edges[index],
-        #    90 * np.random.randint(0, 4)) for index in shuffled_indices])
-        individual = np.array([piece_edges[index] for index in shuffled_indices])
-        individual = np.roll(individual, np.random.randint(0, 4))
+
+        #individual = np.array([piece_edges[index] for index in shuffled_indices])
+        #rotation = np.random.randint(0, 4)
+        #individual = np.roll(individual, rotation)
+        individual = []
+        rotations = []
+        for index in shuffled_indices:
+            rotation = np.random.randint(0, 4)
+            rotations.append(rotation)
+            individual.append(np.roll(piece_edges[index], rotation, axis=0))
 
         # reshaping the indices and individual
         shuffled_indices = shuffled_indices.reshape((n_segments, n_segments))
-        individual = individual.reshape((n_segments, n_segments, -1))
+        individual = np.array(individual).reshape(
+            (n_segments, n_segments, 4, -1))
+        rotations = np.array(rotations).reshape((n_segments, n_segments))
 
-        pop.append((individual, shuffled_indices))
+        pop.append((individual, shuffled_indices, rotations))
 
     return pop
+
+def get_fitness(ind):
+    return
 
 N_SEGMENTS = 2
 
@@ -87,8 +101,10 @@ if __name__ == '__main__':
     piece_edges =  np.array([np.array([
         piece[0, :],
         piece[:, -1],
-        np.flip(piece[-1, :]),
-        np.flip(piece[:, 0])
+        #np.flip(piece[-1, :]),
+        piece[-1, :], # easier to calculate differences
+        #np.flip(piece[:, 0])
+        piece[:, 0] # easier to calculate differences
     ]) for piece in pieces])
 
     '''print('Piece edges:')
@@ -100,4 +116,10 @@ if __name__ == '__main__':
     # TODO: test
     # generating the initial random population
     init_pop = generate_init_pop(piece_edges, N_SEGMENTS)
-    print(init_pop[0])
+
+    '''individual = init_pop[0]
+    print('First individual in the population:')
+    print(individual[0])
+    print(individual[0].shape)
+    print(individual[1])
+    print(individual[2])'''
