@@ -3,7 +3,7 @@ import skimage
 import matplotlib.pyplot as plt
 
 # returns a 1d array of puzzle pieces
-def generate_puzzle(img, n_segments=5):
+def generate_puzzle(img, n_segments=5, shuffle=True):
     # grayscaling
     img = skimage.color.rgb2gray(img)
 
@@ -22,10 +22,11 @@ def generate_puzzle(img, n_segments=5):
         segment_size * j : segment_size * (j + 1)
     ] for i in range(n_segments) for j in range(n_segments)])
 
-    # shuffling and rotating the pieces
-    np.random.shuffle(pieces)
-    pieces = np.array([skimage.transform.rotate(
-        piece, 90 * np.random.randint(0, 4)) for piece in pieces])
+    if shuffle:
+        # shuffling and rotating the pieces
+        np.random.shuffle(pieces)
+        pieces = np.array([skimage.transform.rotate(
+            piece, 90 * np.random.randint(0, 4)) for piece in pieces])
 
     '''# creating the 2d structure for the pieces
     pieces = pieces.reshape((n_segments, n_segments, segment_size, segment_size))
@@ -59,9 +60,6 @@ def generate_init_pop(piece_edges, n_segments, pop_size=100):
         # shuffling the indices and creating an individual with shuffled edges
         shuffled_indices = np.random.permutation(indices)
 
-        #individual = np.array([piece_edges[index] for index in shuffled_indices])
-        #rotation = np.random.randint(0, 4)
-        #individual = np.roll(individual, rotation)
         individual = []
         rotations = []
         for index in shuffled_indices:
@@ -124,6 +122,8 @@ if __name__ == '__main__':
 
     # generating the puzzle pieces
     pieces = generate_puzzle(img, n_segments=N_SEGMENTS)
+    # to be uncommented when testing unshuffled image
+    #pieces = generate_puzzle(img, n_segments=N_SEGMENTS, shuffle=False)
 
     '''print('Individual pieces:')
     for piece in pieces:
@@ -147,9 +147,19 @@ if __name__ == '__main__':
     print(piece_edges.shape)
     print('*' * 50)'''
 
-    # TODO: test
+    # testing unshuffled image
+    # switch the code that generates the puzzle when uncomment this part
+    '''ind = (
+        piece_edges,
+        np.arange(N_SEGMENTS ** 2).reshape((N_SEGMENTS, N_SEGMENTS)),
+        np.zeros((N_SEGMENTS, N_SEGMENTS), dtype=int)
+    )
+
+    print('Fitness:', get_fitness(ind, N_SEGMENTS))
+    visualize(pieces, ind, N_SEGMENTS)'''
+
     # generating the initial random population
-    init_pop = generate_init_pop(piece_edges, N_SEGMENTS, pop_size=1)
+    '''init_pop = generate_init_pop(piece_edges, N_SEGMENTS, pop_size=1)
 
     individual = init_pop[0]
     print('First individual in the population:')
@@ -158,4 +168,4 @@ if __name__ == '__main__':
     print(individual[1])
     print(individual[2])
     print('Fitness:', get_fitness(individual, N_SEGMENTS))
-    print(visualize(pieces, individual, N_SEGMENTS))
+    visualize(pieces, individual, N_SEGMENTS)'''
