@@ -79,8 +79,42 @@ def generate_init_pop(piece_edges, n_segments, pop_size=100):
 
     return pop
 
-def get_fitness(ind):
-    return
+# returns the differences in piece edges next to each other
+def get_fitness(ind, n_segments):
+    # simple square of difference
+    def get_difference(edge1, edge2):
+        return np.sum((edge1 - edge2) ** 2)
+
+    piece_edges = ind[0]
+    running_fitness = 0
+
+    for i in range(n_segments - 1):
+        for j in range(n_segments):
+            running_fitness += get_difference(
+                piece_edges[i, j][2], piece_edges[i + 1, j][0])
+            running_fitness += get_difference(
+                piece_edges[j, i][1], piece_edges[j, i + 1][3])
+
+    return running_fitness
+
+def visualize(pieces, ind, n_segments):
+    indices = ind[1]
+    rotations = ind[2]
+
+    f, ax = plt.subplots(n_segments, n_segments, figsize=(5, 5))
+
+    for i in range(n_segments):
+        for j in range(n_segments):
+            ax[i, j].imshow(
+                skimage.transform.rotate(
+                    pieces[indices[i, j]], 90 * rotations[i, j]),
+                cmap='gray'
+            )
+            ax[i, j].set_xticklabels([])
+            ax[i, j].set_yticklabels([])
+
+    plt.tight_layout()
+    plt.show()
 
 N_SEGMENTS = 3
 
@@ -115,11 +149,13 @@ if __name__ == '__main__':
 
     # TODO: test
     # generating the initial random population
-    init_pop = generate_init_pop(piece_edges, N_SEGMENTS)
+    init_pop = generate_init_pop(piece_edges, N_SEGMENTS, pop_size=1)
 
-    '''individual = init_pop[0]
+    individual = init_pop[0]
     print('First individual in the population:')
     print(individual[0])
     print(individual[0].shape)
     print(individual[1])
-    print(individual[2])'''
+    print(individual[2])
+    print('Fitness:', get_fitness(individual, N_SEGMENTS))
+    print(visualize(pieces, individual, N_SEGMENTS))
