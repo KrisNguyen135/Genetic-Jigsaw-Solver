@@ -1,4 +1,4 @@
-import numpy as np; np.random.seed(0)
+import numpy as np; np.random.seed(13)
 import skimage
 import matplotlib.pyplot as plt
 
@@ -31,18 +31,6 @@ def generate_puzzle(img, n_segments=5, shuffle=True):
     '''# creating the 2d structure for the pieces
     pieces = pieces.reshape((n_segments, n_segments, segment_size, segment_size))
     #print('Pieces shape:', pieces.shape)'''
-
-    # printing out the pieces
-    '''f, ax = plt.subplots(n_segments, n_segments, figsize=(10, 10))
-
-    for i in range(n_segments):
-        for j in range(n_segments):
-            ax[i, j].imshow(pieces[i, j], cmap='gray')
-            ax[i, j].set_xticklabels([])
-            ax[i, j].set_yticklabels([])
-
-    plt.tight_layout()
-    plt.show()'''
 
     return pieces
 
@@ -84,16 +72,25 @@ def get_fitness(ind, n_segments):
         return np.sum((edge1 - edge2) ** 2)
 
     piece_edges = ind[0]
-    running_fitness = 0
+    #running_fitness = 0
+
+    # TODO: fix the code that adds numbers into this matrix below
+    fitness_matrix = np.zeros((2 * n_segments, n_segments - 1))
 
     for i in range(n_segments - 1):
         for j in range(n_segments):
-            running_fitness += get_difference(
+            '''running_fitness += get_difference(
                 piece_edges[i, j][2], piece_edges[i + 1, j][0])
             running_fitness += get_difference(
+                piece_edges[j, i][1], piece_edges[j, i + 1][3])'''
+
+            # TODO: think about the flip and what numbers go where
+            fitness_matrix[i, j] = get_difference(
+                piece_edges[i, j][2], piece_edges[i + 1, j][0])
+            fitness_matrix[j, i] = get_difference(
                 piece_edges[j, i][1], piece_edges[j, i + 1][3])
 
-    return running_fitness
+    return fitness_matrix
 
 def visualize(pieces, ind, n_segments):
     indices = ind[1]
@@ -159,9 +156,9 @@ if __name__ == '__main__':
     visualize(pieces, ind, N_SEGMENTS)'''
 
     # generating the initial random population
-    '''init_pop = generate_init_pop(piece_edges, N_SEGMENTS, pop_size=1)
+    init_pop = generate_init_pop(piece_edges, N_SEGMENTS, pop_size=6000)
 
-    individual = init_pop[0]
+    '''individual = init_pop[0]
     print('First individual in the population:')
     print(individual[0])
     print(individual[0].shape)
@@ -169,3 +166,15 @@ if __name__ == '__main__':
     print(individual[2])
     print('Fitness:', get_fitness(individual, N_SEGMENTS))
     visualize(pieces, individual, N_SEGMENTS)'''
+
+    fitness_matrices = np.array([
+        get_fitness(ind, N_SEGMENTS) for ind in init_pop])
+    fitnesses = np.array([matrix.sum() for matrix in fitness_matrices])
+
+    best_fitness_index = np.argmin(fitnesses)
+    best_ind = init_pop[best_fitness_index]
+
+    print('Best fitness matrix:', fitness_matrices[best_fitness_index])
+    print('Best fitness:', fitnesses[best_fitness_index])
+
+    visualize(pieces, best_ind, N_SEGMENTS)
