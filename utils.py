@@ -1,6 +1,11 @@
-import numpy as np; np.random.seed(13)
+import numpy as np
+# for testing purposes:
+# seed = 0 when N_SEGMENTS = 2 to get perfect solution
+# seed = 13 when N_SEGMENTS = 13 to get a solution with a pair of matched pieces
+np.random.seed(13)
 import skimage
 import matplotlib.pyplot as plt
+
 
 # returns a 1d array of puzzle pieces
 def generate_puzzle(img, n_segments=5, shuffle=True):
@@ -28,11 +33,8 @@ def generate_puzzle(img, n_segments=5, shuffle=True):
         pieces = np.array([skimage.transform.rotate(
             piece, 90 * np.random.randint(0, 4)) for piece in pieces])
 
-    '''# creating the 2d structure for the pieces
-    pieces = pieces.reshape((n_segments, n_segments, segment_size, segment_size))
-    #print('Pieces shape:', pieces.shape)'''
-
     return pieces
+
 
 # returns a random initial population
 # each individual contains a tuple of:
@@ -65,7 +67,11 @@ def generate_init_pop(piece_edges, n_segments, pop_size=100):
 
     return pop
 
-# returns the differences in piece edges next to each other
+
+# returns two 2d arrays (matrices) holding differences between adjacent pieces
+# in an individual in a given population
+# the first matrix has `n_segments` rows and `n_segments - 1` columns, holding
+# differences between horizonally adjacent pieces
 def get_fitness(ind, n_segments):
     # simple square of difference
     def get_difference(edge1, edge2):
@@ -84,9 +90,9 @@ def get_fitness(ind, n_segments):
             horizontal_fitness_matrix[j, i] = get_difference(
                 piece_edges[j, i][1], piece_edges[j, i + 1][3])
 
-
     return (horizontal_fitness_matrix, vertical_fitness_matrix)
 
+# drawing the pieces in the order and rotation specified in an individual
 def visualize(pieces, ind, n_segments):
     indices = ind[1]
     rotations = ind[2]
@@ -98,10 +104,33 @@ def visualize(pieces, ind, n_segments):
             ax[i, j].imshow(
                 skimage.transform.rotate(
                     pieces[indices[i, j]], 90 * rotations[i, j]),
-                cmap='gray'
+                cmap = 'gray'
             )
             ax[i, j].set_xticklabels([])
             ax[i, j].set_yticklabels([])
 
     plt.tight_layout()
     plt.show()
+
+# calculates all differences between first and seconds layers of each piece
+# returns the percentile threshold of the calculated differences
+# used to define potential matches between pairs of pieces
+def generate_threshold(pieces, p=90):
+    differences = []
+    for piece in pieces:
+        differences.append(
+            np.sum((piece[0, :] - piece[1, :]) ** 2))
+        differences.append(
+            np.sum((piece[:, -1] - piece[:, -2]) ** 2))
+        differences.append(
+            np.sum((piece[-1, :] - piece[-2, :]) ** 2))
+        differences.append(
+            np.sum((piece[:, 0] - piece[:, 1]) ** 2))
+
+    #differences = np.array(differences)
+
+    '''print('Mean difference:', differences.mean())
+    plt.hist(differences)
+    plt.show()'''
+
+    return np.percentile(differences, p)
