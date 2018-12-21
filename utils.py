@@ -115,7 +115,7 @@ def visualize(pieces, ind, n_segments):
 # calculates all differences between first and seconds layers of each piece
 # returns the percentile threshold of the calculated differences
 # used to define potential matches between pairs of pieces
-def generate_threshold(pieces, p=90):
+def generate_threshold(pieces, p=100):
     differences = []
     for piece in pieces:
         differences.append(
@@ -134,3 +134,57 @@ def generate_threshold(pieces, p=90):
     plt.show()'''
 
     return np.percentile(differences, p)
+
+# TODO: test extract_good_matches() in test.py with different edge cases
+def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pair2
+    threshold, n_segments, n_offsprings=1):
+
+    def extract_good_matches(fitness_matrix_pair):
+        def change_id(cluster_matrix, target_id, result_id):
+            for i in range(cluster_matrix.shape[0]):
+                for j in range(cluster_matrix.shape[1]):
+                    if cluster_matrix[i, j] == target_id:
+                        cluster_matrix[i, j] = result_id
+
+        good_match_horizontal_matrix = fitness_matrix_pair[0] <= threshold
+        good_match_vertical_matrix = fitness_matrix_pair[1] <= threshold
+
+        cluster_matrix = np.zeros((n_segments, n_segments))
+
+        id = 1
+        for i in range(good_match_horizontal_matrix.shape[0]):
+            for j in range(good_match_horizontal_matrix.shape[1]):
+                if good_match_horizontal_matrix[i, j]:
+                    if cluster_matrix[i, j] == 0 and cluster_matrix[i, j + 1] == 0:
+                        id += 1
+                        cluster_matrix[i, j] = id
+                        cluster_matrix[i, j + 1] = id
+                    elif cluster_matrix[i, j] == 0 and cluster_matrix[i, j + 1] != 0:
+                        cluster_matrix[i, j] = cluster_matrix[i, j + 1]
+                    elif cluster_matrix[i, j] != 0 and cluster_matrix[i, j + 1] == 0:
+                        cluster_matrix[i, j + 1] = cluster_matrix[i, j]
+                    else:
+                        change_id(cluster_matrix, cluster_matrix[i, j],
+                            cluster_matrix[i, j + 1])
+
+        for i in range(good_match_vertical_matrix.shape[0]):
+            for j in range(good_match_vertical_matrix.shape[1]):
+                if good_match_vertical_matrix[i, j]:
+                    if cluster_matrix[i, j] == 0 and cluster_matrix[i + 1, j] == 0:
+                        id += 1
+                        cluster_matrix[i, j] = id
+                        cluster_matrix[i + 1, j] = id
+                    elif cluster_matrix[i, j] == 0 and cluster_matrix[i + 1, j] != 0:
+                        cluster_matrix[i, j] = cluster_matrix[i + 1, j]
+                    elif cluster_matrix[i, j] != 0 and cluster_matrix[i + 1, j] == 0:
+                        cluster_matrix[i + 1, j] = cluster_matrix[i, j]
+                    else:
+                        change_id(cluster_matrix, cluster_matrix[i, j],
+                            cluster_matrix[i + 1, j])
+
+        print(cluster_matrix)
+
+        return
+
+    extract_good_matches(fitness_matrix_pair1)
+    #extract_good_matches(fitness_matrix_pair2)
