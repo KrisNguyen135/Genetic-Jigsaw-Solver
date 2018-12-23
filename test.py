@@ -12,6 +12,14 @@ if __name__ == '__main__':
     # generating the puzzle pieces
     #pieces = generate_puzzle(img, n_segments=N_SEGMENTS)
 
-    test_fitness_matrix_pair1 = np.array()
+    test_fitness_matrix_pair1 = (np.array([
+        [10, 10],
+        [10, 10],
+        [10, 1]
+    ]), np.array([
+        [1, 10, 10],
+        [10, 10, 1]
+    ]))
 
-    generate_offspring(None, )
+    generate_offspring(None, test_fitness_matrix_pair1, None, None,
+        2, N_SEGMENTS)
