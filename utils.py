@@ -138,7 +138,6 @@ def generate_threshold(pieces, p=100):
     return np.percentile(differences, p)
 
 
-# TODO: test extract_good_matches() in test.py with different edge cases
 def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pair2,
     threshold, n_segments, n_offsprings=1):
 
@@ -154,7 +153,7 @@ def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pa
         good_match_vertical_matrix = fitness_matrix_pair[1] <= threshold
 
         cluster_matrix = np.zeros((n_segments, n_segments), dtype=int)
-        id_set = set()
+        #id_set = set()
 
         id = 1
         for i in range(good_match_horizontal_matrix.shape[0]):
@@ -163,7 +162,7 @@ def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pa
                     if cluster_matrix[i, j] == 0 and cluster_matrix[i, j + 1] == 0:
                         cluster_matrix[i, j] = id
                         cluster_matrix[i, j + 1] = id
-                        id_set.add(id)
+                        #id_set.add(id)
                         id += 1
                     elif cluster_matrix[i, j] == 0 and cluster_matrix[i, j + 1] != 0:
                         cluster_matrix[i, j] = cluster_matrix[i, j + 1]
@@ -172,7 +171,7 @@ def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pa
                     else:
                         change_id(cluster_matrix, cluster_matrix[i, j],
                             cluster_matrix[i, j + 1])
-                        id_set.remove(cluster_matrix[i, j])
+                        #id_set.remove(cluster_matrix[i, j])
 
         for i in range(good_match_vertical_matrix.shape[0]):
             for j in range(good_match_vertical_matrix.shape[1]):
@@ -180,7 +179,7 @@ def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pa
                     if cluster_matrix[i, j] == 0 and cluster_matrix[i + 1, j] == 0:
                         cluster_matrix[i, j] = id
                         cluster_matrix[i + 1, j] = id
-                        id_set.add(id)
+                        #id_set.add(id)
                         id += 1
                     elif cluster_matrix[i, j] == 0 and cluster_matrix[i + 1, j] != 0:
                         cluster_matrix[i, j] = cluster_matrix[i + 1, j]
@@ -189,12 +188,37 @@ def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pa
                     else:
                         change_id(cluster_matrix, cluster_matrix[i, j],
                             cluster_matrix[i + 1, j])
-                        id_set.remove(cluster_matrix[i, j])
+                        #id_set.remove(cluster_matrix[i, j])
 
         #print(cluster_matrix)
         #print(id_set)
 
-        return (cluster_matrix, id_set)
+        #return (cluster_matrix, id_set)
+        return cluster_matrix
 
-    extract_good_matches(fitness_matrix_pair1)
-    #extract_good_matches(fitness_matrix_pair2)
+
+    def generate_cluster_id_to_piece(parent, fitness_matrix_pair):
+        indices = parent[1]
+        rotations = parent[2]
+
+        #cluster_matrix, id_set = extract_good_matches(fitness_matrix_pair)
+        cluster_matrix = extract_good_matches(fitness_matrix_pair)
+
+        cluster_id_to_piece = {}
+        for i in range(n_segments):
+            for j in range(n_segments):
+                if cluster_matrix[i, j]:
+                    if cluster_matrix[i, j] not in cluster_id_to_piece:
+                        cluster_id_to_piece[cluster_matrix[i, j]] = set()
+
+                    cluster_id_to_piece[cluster_matrix[i, j]].add(indices[i, j])
+
+        return cluster_id_to_piece
+
+
+    # TODO: match clusters that have common pieces
+    def find_connected_clusters(parent1, fitness_matrix_pair1,
+        parent2, fitness_matrix_pair2):
+
+        cluster_id_to_piece1 = generate_cluster_id_to_piece(parent1, fitness_matrix_pair1)
+        cluster_id_to_piece2 = generate_cluster_id_to_piece(parent2, fitness_matrix_pair2)
