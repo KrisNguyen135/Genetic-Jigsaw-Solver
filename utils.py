@@ -131,10 +131,6 @@ def generate_threshold(pieces, p=100):
 
     #differences = np.array(differences)
 
-    '''print('Mean difference:', differences.mean())
-    plt.hist(differences)
-    plt.show()'''
-
     return np.percentile(differences, p)
 
 
@@ -142,6 +138,7 @@ def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pa
     threshold, n_segments, n_offsprings=1):
 
     def extract_good_matches(fitness_matrix_pair):
+
         def change_id(cluster_matrix, target_id, result_id):
             for i in range(cluster_matrix.shape[0]):
                 for j in range(cluster_matrix.shape[1]):
@@ -153,7 +150,6 @@ def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pa
         good_match_vertical_matrix = fitness_matrix_pair[1] <= threshold
 
         cluster_matrix = np.zeros((n_segments, n_segments), dtype=int)
-        #id_set = set()
 
         id = 1
         for i in range(good_match_horizontal_matrix.shape[0]):
@@ -162,7 +158,6 @@ def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pa
                     if cluster_matrix[i, j] == 0 and cluster_matrix[i, j + 1] == 0:
                         cluster_matrix[i, j] = id
                         cluster_matrix[i, j + 1] = id
-                        #id_set.add(id)
                         id += 1
                     elif cluster_matrix[i, j] == 0 and cluster_matrix[i, j + 1] != 0:
                         cluster_matrix[i, j] = cluster_matrix[i, j + 1]
@@ -171,7 +166,6 @@ def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pa
                     else:
                         change_id(cluster_matrix, cluster_matrix[i, j],
                             cluster_matrix[i, j + 1])
-                        #id_set.remove(cluster_matrix[i, j])
 
         for i in range(good_match_vertical_matrix.shape[0]):
             for j in range(good_match_vertical_matrix.shape[1]):
@@ -179,7 +173,6 @@ def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pa
                     if cluster_matrix[i, j] == 0 and cluster_matrix[i + 1, j] == 0:
                         cluster_matrix[i, j] = id
                         cluster_matrix[i + 1, j] = id
-                        #id_set.add(id)
                         id += 1
                     elif cluster_matrix[i, j] == 0 and cluster_matrix[i + 1, j] != 0:
                         cluster_matrix[i, j] = cluster_matrix[i + 1, j]
@@ -188,23 +181,13 @@ def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pa
                     else:
                         change_id(cluster_matrix, cluster_matrix[i, j],
                             cluster_matrix[i + 1, j])
-                        #id_set.remove(cluster_matrix[i, j])
 
-        #print(cluster_matrix)
-        #print(id_set)
-
-        #return (cluster_matrix, id_set)
         return cluster_matrix
 
 
-    def generate_cluster_id_to_piece(parent, fitness_matrix_pair):
-        indices = parent[1]
-        rotations = parent[2]
-
-        #cluster_matrix, id_set = extract_good_matches(fitness_matrix_pair)
-        cluster_matrix = extract_good_matches(fitness_matrix_pair)
-
+    def generate_cluster_id_to_piece(indices, fitness_matrix_pair, cluster_matrix):
         cluster_id_to_piece = {}
+
         for i in range(n_segments):
             for j in range(n_segments):
                 if cluster_matrix[i, j]:
@@ -217,8 +200,52 @@ def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pa
 
 
     # TODO: match clusters that have common pieces
-    def find_connected_clusters(parent1, fitness_matrix_pair1,
-        parent2, fitness_matrix_pair2):
+    def find_connected_clusters():
 
-        cluster_id_to_piece1 = generate_cluster_id_to_piece(parent1, fitness_matrix_pair1)
-        cluster_id_to_piece2 = generate_cluster_id_to_piece(parent2, fitness_matrix_pair2)
+        def get_cluster_fitness(cluster_id, fitness_matrix_pair, cluster_matrix):
+            good_match_horizontal_matrix, good_match_vertical_matrix = fitness_matrix_pair
+
+            target_differences = []
+            for i in range(good_match_horizontal_matrix.shape[0]):
+                for j in range(good_match_horizontal_matrix.shape[1]):
+                    if good_match_horizontal_matrix[i, j] <= threshold:
+                        if cluster_matrix[i, j] == cluster_id:
+                            target_differences.append(good_match_horizontal_matrix[i, j])
+
+            for i in range(good_match_vertical_matrix.shape[0]):
+                for j in range(good_match_vertical_matrix.shape[1]):
+                    if good_match_vertical_matrix[i, j] <= threshold:
+                        if cluster_matrix[i, j] == cluster_id:
+                            target_differences.append(good_match_vertical_matrix[i, j])
+
+            return np.array(target_differences).mean()
+
+        cluster_matrix1 = extract_good_matches(fitness_matrix_pair1)
+        cluster_matrix2 = extract_good_matches(fitness_matrix_pair2)
+
+        cluster_id_to_piece1 = generate_cluster_id_to_piece(parent1[1],
+            fitness_matrix_pair1, cluster_matrix1)
+        cluster_id_to_piece2 = generate_cluster_id_to_piece(parent2[1],
+            fitness_matrix_pair2, cluster_matrix2)
+
+        #print(get_cluster_fitness(2, fitness_matrix_pair1, cluster_matrix1))
+
+        result_id_to_piece = {}
+
+        for id1 in cluster_id_to_piece1:
+            for id2 in cluster_id_to_piece2:
+                if cluster_id_to_piece1[id1].intersection(cluster_id_to_piece2[id2]):
+                    # TODO: check to see if there is a conflict
+                    # if there is, go to the next `if` condition
+                    # otherwise merge the two clusters and append to the result dict
+
+                    if get_cluster_fitness(id1, fitness_matrix_pair1, cluster_matrix1)\
+                        < get_cluster_fitness(id2, fitness_matrix_pair2, cluster_matrix2):
+
+                        # TODO: append the better cluster to the result dict
+
+
+    #cluster_matrix = extract_good_matches(fitness_matrix_pair1)
+    #print(cluster_matrix)
+
+    find_connected_clusters()
