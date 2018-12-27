@@ -6,6 +6,7 @@
 
 # Future improvements
 
+- Optimizing the calculation of fitness (maybe use the cluster matrix during)
 - Implementing concurrency to improve execution time
 - Comparing between using grayscale and not using grayscale
 
