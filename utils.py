@@ -133,81 +133,31 @@ def generate_threshold(pieces, p=100):
 
     return np.percentile(differences, p)
 
-
+# returns a fitness_matrix, cluster matrix, a dictionary of cluster fitnesses,
+# and the match-orientation array in a tuple
+#
+# cluster matrix: adjacent matching pieces will have the same index
+#
+# cluster fitness: average of all differences in adjacent matching pieces
+#
+# match-orientation array: each piece index maps to a 4-element array
+# containing either `None` (if the specific side is not matched) or
+# (id of match piece, fitness) (if the side is matched)
+# 1st element --> match at top, 2nd element --> match on right, etc.
 def get_ind_stats(ind, threshold, n_segments):
 
-    # returns a cluster matrix and the match-orientation array in a tuple
-    #
-    # cluster matrix: adjacent matching pieces will have the same index
-    #
-    # match-orientation array: each piece index maps to a 4-element array
-    # containing either `None` (if the specific side is not matched) or
-    # `piece_id` (if the side is matched)
-    # 1st element --> match at top, 2nd element --> match on right, etc.
-    def generate_match_stats(fitness_matrix_pair):
-
-        def change_id(cluster_matrix, target_id, result_id):
-            for i in range(cluster_matrix.shape[0]):
-                for j in range(cluster_matrix.shape[1]):
-                    if cluster_matrix[i, j] == target_id:
-                        cluster_matrix[i, j] = result_id
+    # mutates the cluster matrix
+    # changes every occurence of the target id to the result id
+    def change_cluster_id(cluster_matrix, target_id, result_id):
+        for i in range(cluster_matrix.shape[0]):
+            for j in range(cluster_matrix.shape[1]):
+                if cluster_matrix[i, j] == target_id:
+                    cluster_matrix[i, j] = result_id
 
 
-        # initializing the cluster matrix
-        good_match_horizontal_matrix = fitness_matrix_pair[0] <= threshold
-        good_match_vertical_matrix = fitness_matrix_pair[1] <= threshold
-
-        cluster_matrix = np.zeros((n_segments, n_segments), dtype=int)
-
-        # initializing the match-orientation array
-        piece_indices = ind[1]
-        rotations = ind[2]
-        match_orientations = np.array([np.array([None for i in range(4)])
-            for j in range(piece_indices.size)])
-
-        id = 1
-        for i in range(good_match_horizontal_matrix.shape[0]):
-            for j in range(good_match_horizontal_matrix.shape[1]):
-                if good_match_horizontal_matrix[i, j]:
-
-                    if cluster_matrix[i, j] == 0 and cluster_matrix[i, j + 1] == 0:
-                        cluster_matrix[i, j] = id
-                        cluster_matrix[i, j + 1] = id
-                        id += 1
-                    elif cluster_matrix[i, j] == 0 and cluster_matrix[i, j + 1] != 0:
-                        cluster_matrix[i, j] = cluster_matrix[i, j + 1]
-                    elif cluster_matrix[i, j] != 0 and cluster_matrix[i, j + 1] == 0:
-                        cluster_matrix[i, j + 1] = cluster_matrix[i, j]
-                    else:
-                        change_id(cluster_matrix, cluster_matrix[i, j],
-                            cluster_matrix[i, j + 1])
-
-                    match_orientations[piece_indices[i, j]][1] = piece_indices[i, j + 1]
-                    match_orientations[piece_indices[i, j + 1]][3] = piece_indices[i, j]
-
-        for i in range(good_match_vertical_matrix.shape[0]):
-            for j in range(good_match_vertical_matrix.shape[1]):
-                if good_match_vertical_matrix[i, j]:
-                    if cluster_matrix[i, j] == 0 and cluster_matrix[i + 1, j] == 0:
-                        cluster_matrix[i, j] = id
-                        cluster_matrix[i + 1, j] = id
-                        id += 1
-                    elif cluster_matrix[i, j] == 0 and cluster_matrix[i + 1, j] != 0:
-                        cluster_matrix[i, j] = cluster_matrix[i + 1, j]
-                    elif cluster_matrix[i, j] != 0 and cluster_matrix[i + 1, j] == 0:
-                        cluster_matrix[i + 1, j] = cluster_matrix[i, j]
-                    else:
-                        change_id(cluster_matrix, cluster_matrix[i, j],
-                            cluster_matrix[i + 1, j])
-
-                    match_orientations[piece_indices[i, j]][2] = piece_indices[i + 1, j]
-                    match_orientations[piece_indices[i + 1, j]][0] = piece_indices[i, j]
-
-        return (cluster_matrix, match_orientations)
-
-
+    # obtaining the fitness matrix
     #fitness_matrix_pair = get_fitness(ind, n_segments)
-    test_fitness_matrix_pair = (np.array([
+    fitness_matrix_pair = (np.array([
         [10, 10, 10, 10],
         [10, 10, 10, 10],
         [10, 10, 0, 1],
@@ -220,84 +170,92 @@ def get_ind_stats(ind, threshold, n_segments):
         [10, 10, 10, 10, 10]
     ]))
 
-    cluster_matrix, match_orientations = generate_match_stats(
-        test_fitness_matrix_pair)
+    # initializing the cluster matrix
+    good_match_horizontal_matrix = fitness_matrix_pair[0] <= threshold
+    good_match_vertical_matrix = fitness_matrix_pair[1] <= threshold
 
-    print('\nPiece indices:')
-    print(ind[1])
-    print('\nRotations:')
-    print(ind[2])
-    print('\nCluster matrix:')
-    print(cluster_matrix)
-    print('\nMatch-orientation array:')
-    print(match_orientations)
-    print()
+    cluster_matrix = np.zeros((n_segments, n_segments), dtype=int)
 
-'''def generate_offspring(parent1, fitness_matrix_pair1, parent2, fitness_matrix_pair2,
-    threshold, n_segments, n_offsprings=1):
+    # initializing the match-orientation array
+    piece_indices = ind[1]
+    rotations = ind[2]
+    match_orientations = np.array([np.array([None for i in range(4)])
+        for j in range(piece_indices.size)])
 
-    def generate_cluster_id_to_piece(indices, fitness_matrix_pair, cluster_matrix):
-        cluster_id_to_piece = {}
+    # cluster id
+    cluster_id_set = set()
+    id = 1
 
-        for i in range(n_segments):
-            for j in range(n_segments):
-                if cluster_matrix[i, j]:
-                    if cluster_matrix[i, j] not in cluster_id_to_piece:
-                        cluster_id_to_piece[cluster_matrix[i, j]] = set()
+    # filling in values in the cluster matrix and match-orientation array
+    for i in range(good_match_horizontal_matrix.shape[0]):
+        for j in range(good_match_horizontal_matrix.shape[1]):
+            if good_match_horizontal_matrix[i, j]:
 
-                    cluster_id_to_piece[cluster_matrix[i, j]].add(indices[i, j])
+                if cluster_matrix[i, j] == 0 and cluster_matrix[i, j + 1] == 0:
+                    cluster_matrix[i, j] = id
+                    cluster_matrix[i, j + 1] = id
+                    id += 1
+                    cluster_id_set.add(id)
 
-        return cluster_id_to_piece
+                elif cluster_matrix[i, j] == 0 and cluster_matrix[i, j + 1] != 0:
+                    cluster_matrix[i, j] = cluster_matrix[i, j + 1]
 
+                elif cluster_matrix[i, j] != 0 and cluster_matrix[i, j + 1] == 0:
+                    cluster_matrix[i, j + 1] = cluster_matrix[i, j]
 
-    # TODO: match clusters that have common pieces
-    def find_connected_clusters():
+                else:
+                    change_cluster_id(cluster_matrix, cluster_matrix[i, j],
+                        cluster_matrix[i, j + 1])
 
-        def get_cluster_fitness(cluster_id, fitness_matrix_pair, cluster_matrix):
-            good_match_horizontal_matrix, good_match_vertical_matrix = fitness_matrix_pair
+                match_orientations[piece_indices[i, j]][1] = (
+                    piece_indices[i, j + 1], fitness_matrix_pair[0][i, j])
+                match_orientations[piece_indices[i, j + 1]][3] = (
+                    piece_indices[i, j], fitness_matrix_pair[0][i, j])
 
-            target_differences = []
-            for i in range(good_match_horizontal_matrix.shape[0]):
-                for j in range(good_match_horizontal_matrix.shape[1]):
-                    if good_match_horizontal_matrix[i, j] <= threshold:
-                        if cluster_matrix[i, j] == cluster_id:
-                            target_differences.append(good_match_horizontal_matrix[i, j])
+    for i in range(good_match_vertical_matrix.shape[0]):
+        for j in range(good_match_vertical_matrix.shape[1]):
+            if good_match_vertical_matrix[i, j]:
+                if cluster_matrix[i, j] == 0 and cluster_matrix[i + 1, j] == 0:
+                    cluster_matrix[i, j] = id
+                    cluster_matrix[i + 1, j] = id
+                    id += 1
+                    cluster_id_set.add(id)
 
-            for i in range(good_match_vertical_matrix.shape[0]):
-                for j in range(good_match_vertical_matrix.shape[1]):
-                    if good_match_vertical_matrix[i, j] <= threshold:
-                        if cluster_matrix[i, j] == cluster_id:
-                            target_differences.append(good_match_vertical_matrix[i, j])
+                elif cluster_matrix[i, j] == 0 and cluster_matrix[i + 1, j] != 0:
+                    cluster_matrix[i, j] = cluster_matrix[i + 1, j]
 
-            return np.array(target_differences).mean()
+                elif cluster_matrix[i, j] != 0 and cluster_matrix[i + 1, j] == 0:
+                    cluster_matrix[i + 1, j] = cluster_matrix[i, j]
 
-        cluster_matrix1 = generate_cluster_matrix(fitness_matrix_pair1)
-        cluster_matrix2 = generate_cluster_matrix(fitness_matrix_pair2)
+                else:
+                    change_cluster_id(cluster_matrix, cluster_matrix[i, j],
+                        cluster_matrix[i + 1, j])
 
-        cluster_id_to_piece1 = generate_cluster_id_to_piece(parent1[1],
-            fitness_matrix_pair1, cluster_matrix1)
-        cluster_id_to_piece2 = generate_cluster_id_to_piece(parent2[1],
-            fitness_matrix_pair2, cluster_matrix2)
+                match_orientations[piece_indices[i, j]][2] = (
+                    piece_indices[i + 1, j], fitness_matrix_pair[1][i, j])
+                match_orientations[piece_indices[i + 1, j]][0] = (
+                    piece_indices[i, j], fitness_matrix_pair[1][i, j])
 
-        #print(get_cluster_fitness(2, fitness_matrix_pair1, cluster_matrix1))
+    # calculating fitness of each cluster
+    cluster_fitnesses = {}
+    for id in cluster_id_set:
+        cluster_fitnesses[id] = [0, 0]
 
-        result_id_to_piece = {}
+    for i in range(cluster_matrix.shape[0]):
+        for j in range(cluster_matrix.shape[1]):
+            if cluster_matrix[i, j]:
+                for item in match_orientations[piece_indices[i, j]]:
+                    if item is not None:
+                        cluster_fitnesses[cluster_matrix[i, j]][0] += item[1]
+                        cluster_fitnesses[cluster_matrix[i, j]][1] += 1
 
-        for id1 in cluster_id_to_piece1:
-            for id2 in cluster_id_to_piece2:
-                if cluster_id_to_piece1[id1].intersection(cluster_id_to_piece2[id2]):
-                    # TODO: check to see if there is a conflict
-                    # if there is, go to the next `if` condition
-                    # otherwise merge the two clusters and append to the result dict
+    for id in cluster_id_set:
+        fitness_sum, fitness_count = cluster_fitnesses[id]
+        if fitness_count == 0:
+            del cluster_fitnesses[id]
+        else:
+            cluster_fitnesses[id] = fitness_sum / fitness_count
 
-                    if get_cluster_fitness(id1, fitness_matrix_pair1, cluster_matrix1)\
-                        < get_cluster_fitness(id2, fitness_matrix_pair2, cluster_matrix2):
+    return (cluster_matrix, cluster_fitnesses, match_orientations)
 
-                        # TODO: append the better cluster to the result dict
-
-
-    #cluster_matrix = generate_cluster_matrix(fitness_matrix_pair1)
-    #print(cluster_matrix)
-
-    #find_connected_clusters()
-    return'''
+def 

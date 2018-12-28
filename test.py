@@ -6,7 +6,7 @@ N_SEGMENTS = 5
 
 if __name__ == '__main__':
 
-    '''test_fitness_matrix_pair1 = (np.array([
+    '''fitness_matrix_pair = (np.array([
         [10, 10, 10, 10],
         [10, 10, 10, 10],
         [10, 10, 0, 1],
@@ -19,7 +19,7 @@ if __name__ == '__main__':
         [10, 10, 10, 10, 10]
     ]))'''
 
-    parent1 = (None, np.array([
+    ind = (None, np.array([
         [0, 1, 2, 3, 4],
         [5, 6, 7, 8, 9],
         [10, 11, 12, 13, 14],
@@ -27,7 +27,20 @@ if __name__ == '__main__':
         [20, 21, 22, 23, 24]
     ]), np.zeros((N_SEGMENTS, N_SEGMENTS), dtype=int))
 
-    get_ind_stats(parent1, 2, N_SEGMENTS)
+    cluster_matrix, cluster_fitnesses, match_orientations = get_ind_stats(
+        ind, 2, N_SEGMENTS)
+
+    print('\nPiece indices:')
+    print(ind[1])
+    print('\nRotations:')
+    print(ind[2])
+    print('\nCluster matrix:')
+    print(cluster_matrix)
+    print('\nCluster fitnesses:')
+    print(cluster_fitnesses)
+    print('\nMatch-orientation array:')
+    print(match_orientations)
+    print()
 
     #generate_offspring(parent1, test_fitness_matrix_pair1, None, None,
     #    2, N_SEGMENTS)
