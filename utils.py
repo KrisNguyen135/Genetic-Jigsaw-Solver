@@ -133,18 +133,16 @@ def generate_threshold(pieces, p=100):
 
     return np.percentile(differences, p)
 
+
 # returns a fitness_matrix, cluster matrix, a dictionary of cluster fitnesses,
 # and the match-orientation array in a tuple
-#
-# cluster matrix: adjacent matching pieces will have the same index
-#
-# cluster fitness: average of all differences in adjacent matching pieces
-#
-# match-orientation array: each piece index maps to a 4-element array
+# - cluster matrix: adjacent matching pieces will have the same index
+# - cluster fitness: average of all differences in adjacent matching pieces
+# - match-orientation array: each piece index maps to a 4-element array
 # containing either `None` (if the specific side is not matched) or
 # (id of match piece, fitness) (if the side is matched)
 # 1st element --> match at top, 2nd element --> match on right, etc.
-def get_ind_stats(ind, threshold, n_segments):
+def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
 
     # mutates the cluster matrix
     # changes every occurence of the target id to the result id
@@ -156,19 +154,8 @@ def get_ind_stats(ind, threshold, n_segments):
 
 
     # obtaining the fitness matrix
-    #fitness_matrix_pair = get_fitness(ind, n_segments)
-    fitness_matrix_pair = (np.array([
-        [10, 10, 10, 10],
-        [10, 10, 10, 10],
-        [10, 10, 0, 1],
-        [10, 10, 1, 10],
-        [10, 10, 10, 10]
-    ]), np.array([
-        [10, 10, 10, 10, 10],
-        [1, 10, 10, 10, 10],
-        [0, 10, 1, 1, 10],
-        [10, 10, 10, 10, 10]
-    ]))
+    if fitness_matrix_pair is None:
+        fitness_matrix_pair = get_fitness(ind, n_segments)
 
     # initializing the cluster matrix
     good_match_horizontal_matrix = fitness_matrix_pair[0] <= threshold
@@ -258,4 +245,16 @@ def get_ind_stats(ind, threshold, n_segments):
 
     return (cluster_matrix, cluster_fitnesses, match_orientations)
 
-def 
+
+def generate_offspring(parent1, parent2, threshold, n_segments):
+    parent1_piece_indices, parent1_orientations = parent1[1], parent1[2]
+    parent1_cluster_matrix, parent1_cluster_fitnesses,\
+        parent1_match_orientations = get_ind_stats(parent1, threshold, n_segments)
+    # cluster_id (parent1) --> list of (cluster_id (parent2), list of piece_id)
+    parent1_conflicted_cluster = {id: [] for id in parent1_cluster_fitnesses}
+
+    parent2_piece_indices, parent2_orientations = parent2[1], parent2[2]
+    parent2_cluster_matrix, parent2_cluster_fitnesses,\
+        parent2_match_orientations = get_ind_stats(parent2, threshold, n_segments)
+    # cluster_id (parent2) --> list of (cluster_id (parent1), list of piece_id)
+    parent2_conflicted_cluster = {id: [] for id in parent2_cluster_fitnesses}
