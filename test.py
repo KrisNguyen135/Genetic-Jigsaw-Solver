@@ -2,7 +2,7 @@ import numpy as np
 
 from utils import *
 
-N_SEGMENTS = 5
+N_SEGMENTS = 3
 
 if __name__ == '__main__':
 
@@ -42,3 +42,27 @@ if __name__ == '__main__':
     print('\nMatch-orientation array:')
     print(match_orientations)
     print()'''
+
+
+    # testing generate_offspring() function
+    parent1 = (None, np.array([
+        [4, 3, 0],
+        [5, 6, 1],
+        [2, 8, 7]
+    ]), np.array([
+        [0, 1, 1],
+        [0, 0, 1],
+        [0, 0, 3]
+    ]))
+
+    parent2 = (None, np.array([
+        [3, 4, 6],
+        [2, 5, 8],
+        [1, 7, 0]
+    ]), np.array([
+        [2, 0, 0],
+        [3, 1, 0],
+        [3, 1, 0]
+    ]))
+
+    generate_offspring(parent1, parent2, 2, N_SEGMENTS)

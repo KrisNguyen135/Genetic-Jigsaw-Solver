@@ -51,7 +51,7 @@ def generate_init_pop(piece_edges, n_segments, pop_size=100):
         shuffled_indices = np.random.permutation(indices)
 
         individual = []
-        rotations = []
+        rotations = [] # 0: not rotated, 1: 90-degree clock-wise, etc.
         for index in shuffled_indices:
             rotation = np.random.randint(0, 4)
             rotations.append(rotation)
@@ -142,6 +142,8 @@ def generate_threshold(pieces, p=100):
 # containing either `None` (if the specific side is not matched) or
 # (id of match piece, fitness) (if the side is matched)
 # 1st element --> match at top, 2nd element --> match on right, etc.
+# the orientations are individually-specific and don't correspond to the
+# original orientations
 def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
 
     # mutates the cluster matrix
@@ -181,8 +183,8 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
                 if cluster_matrix[i, j] == 0 and cluster_matrix[i, j + 1] == 0:
                     cluster_matrix[i, j] = id
                     cluster_matrix[i, j + 1] = id
-                    id += 1
                     cluster_id_set.add(id)
+                    id += 1
 
                 elif cluster_matrix[i, j] == 0 and cluster_matrix[i, j + 1] != 0:
                     cluster_matrix[i, j] = cluster_matrix[i, j + 1]
@@ -205,8 +207,8 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
                 if cluster_matrix[i, j] == 0 and cluster_matrix[i + 1, j] == 0:
                     cluster_matrix[i, j] = id
                     cluster_matrix[i + 1, j] = id
-                    id += 1
                     cluster_id_set.add(id)
+                    id += 1
 
                 elif cluster_matrix[i, j] == 0 and cluster_matrix[i + 1, j] != 0:
                     cluster_matrix[i, j] = cluster_matrix[i + 1, j]
@@ -233,6 +235,9 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
             if cluster_matrix[i, j]:
                 for item in match_orientations[piece_indices[i, j]]:
                     if item is not None:
+                        #print(cluster_matrix[i, j])
+                        #print(cluster_fitnesses[cluster_matrix[i, j]])
+                        #print(item)
                         cluster_fitnesses[cluster_matrix[i, j]][0] += item[1]
                         cluster_fitnesses[cluster_matrix[i, j]][1] += 1
 
@@ -246,15 +251,62 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
     return (cluster_matrix, cluster_fitnesses, match_orientations)
 
 
+# TODO: test
 def generate_offspring(parent1, parent2, threshold, n_segments):
+    # generating stats for both parents
     parent1_piece_indices, parent1_orientations = parent1[1], parent1[2]
+
+    parent1_test_fitness_matrix_pair = (np.array([
+        [10, 1],
+        [10, 10],
+        [10, 10]
+    ]), np.array([
+        [10, 10, 0],
+        [10, 10, 10]
+    ])) # used for testing
+
     parent1_cluster_matrix, parent1_cluster_fitnesses,\
-        parent1_match_orientations = get_ind_stats(parent1, threshold, n_segments)
-    # cluster_id (parent1) --> list of (cluster_id (parent2), list of piece_id)
-    parent1_conflicted_cluster = {id: [] for id in parent1_cluster_fitnesses}
+        parent1_match_orientations = get_ind_stats(parent1, threshold, n_segments,
+            fitness_matrix_pair=parent1_test_fitness_matrix_pair)
 
     parent2_piece_indices, parent2_orientations = parent2[1], parent2[2]
+
+    parent2_test_fitness_matrix_pair = (np.array([
+        [10, 10],
+        [10, 10],
+        [10, 10]
+    ]), np.array([
+        [10, 10, 10],
+        [1, 10, 10]
+    ])) # used for testing
+
     parent2_cluster_matrix, parent2_cluster_fitnesses,\
-        parent2_match_orientations = get_ind_stats(parent2, threshold, n_segments)
-    # cluster_id (parent2) --> list of (cluster_id (parent1), list of piece_id)
-    parent2_conflicted_cluster = {id: [] for id in parent2_cluster_fitnesses}
+        parent2_match_orientations = get_ind_stats(parent2, threshold, n_segments,
+            fitness_matrix_pair=parent2_test_fitness_matrix_pair)
+
+    # { cluster_id: set of ids of the pieces in to the cluster }
+    parent1_cluster_to_piece = {}
+    parent2_cluster_to_piece = {}
+    for i in range(n_segments):
+        for j in range(n_segments):
+
+            if parent1_cluster_matrix[i, j]:
+                if parent1_cluster_matrix[i, j] not in parent1_cluster_to_piece:
+                    parent1_cluster_to_piece[parent1_cluster_matrix[i, j]] = set()
+                parent1_cluster_to_piece[parent1_cluster_matrix[i, j]].add(
+                    parent1_piece_indices[i, j])
+
+            if parent2_cluster_matrix[i, j]:
+                if parent2_cluster_matrix[i, j] not in parent2_cluster_to_piece:
+                    parent2_cluster_to_piece[parent2_cluster_matrix[i, j]] = set()
+                parent2_cluster_to_piece[parent2_cluster_matrix[i, j]].add(
+                    parent2_piece_indices[i, j])
+
+    print('Parent1 cluster to piece:')
+    print(parent1_cluster_to_piece)
+    print('Parent2 cluster to piece:')
+    print(parent2_cluster_to_piece)
+
+    # { ( cluster_id (parent1), cluster_id (parent2) ): list of piece indices }
+    mergeable_clusters = {}
+    conflicted_clusters = {}
