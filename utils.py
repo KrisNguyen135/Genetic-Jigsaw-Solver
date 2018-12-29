@@ -171,6 +171,7 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
     match_orientations = np.array([np.array([None for i in range(4)])
         for j in range(piece_indices.size)])
 
+
     # cluster id
     cluster_id_set = set()
     id = 1
@@ -225,6 +226,7 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
                 match_orientations[piece_indices[i + 1, j]][0] = (
                     piece_indices[i, j], fitness_matrix_pair[1][i, j])
 
+
     # calculating fitness of each cluster
     # and generating the cluster id - piece set dictionary
     cluster_fitnesses = {}
@@ -253,12 +255,42 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
         else:
             cluster_fitnesses[id] = fitness_sum / fitness_count
 
+
     return (cluster_matrix, cluster_fitnesses, cluster_to_piece_set,
         match_orientations)
 
 
 # TODO: test
 def generate_offspring(parent1, parent2, threshold, n_segments):
+
+    # precondition: intersection is not empty
+    # returns True if there is a real conflict
+    # returns False if the clusters are mergeable
+    def conflict_check(piece_set_intersection):
+        for piece_id in piece_set_intersection:
+            # subjective orientations (with respect to the current solution/ind)
+            parent1_match_orientation = parent1_match_orientations[piece_id]
+            parent2_match_orientation = parent2_match_orientations[piece_id]
+
+            for i in range(4):
+                if parent1_match_orientation[i] is not None and\
+                    parent2_match_orientation[i] is not None:
+
+                    # objective orientations
+                    # (with respect to the original puzzle)
+                    parent1_current_orientation = parent1_match_orientation\
+                        - parent1_orientations[piece_id]
+                    parent1_current_orientation %= 4
+
+                    parent2_current_orientation = parent2_match_orientation\
+                        - parent2_orientations[piece_id]
+                    parent2_match_orientation %= 4
+
+                    if parent1_current_orientation != parent2_current_orientation:
+                        return True
+
+        return False
+
     # generating stats for both parents
     parent1_piece_indices, parent1_orientations = parent1[1], parent1[2]
 
@@ -292,36 +324,33 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
     print('Parent1 cluster to piece:')
     print(parent1_cluster_to_piece_set)
+    print('-' * 50)
+
+    
     print('Parent2 cluster to piece:')
     print(parent2_cluster_to_piece_set)
+    print('-' * 50)
 
 
-    # { ( cluster_id (parent1), cluster_id (parent2) ): list of piece indices }
+    # { ( cluster_id (parent1), cluster_id (parent2) ):
+    #    intersection set of piece indices }
     mergeable_clusters = {}
-    conflicted_clusters = {}
+    # list of ( cluster_id (parent1), cluster_id (parent2) )
+    conflicted_clusters = []
 
-    '''for parent1_cluster_id in parent1_cluster_to_piece_set:
+    for parent1_cluster_id in parent1_cluster_to_piece_set:
         for parent2_cluster_id in parent2_cluster_to_piece_set:
-            conflict = parent1_cluster_to_piece_set[parent1_cluster_id].intersection(
+            intersect = parent1_cluster_to_piece_set[parent1_cluster_id].intersection(
                 parent2_cluster_to_piece_set[parent2_cluster_id])
 
-            if conflict:
-                for piece_id in conflict:
+            if conflict_check(intersect):
+                conflicted_clusters.append((parent1_cluster_id,
+                    parent2_cluster_id))
+            else:
+                mergeable_clusters[(parent1_cluster_id, parent2_cluster_id)] = intersect
 
-                    # subjective orientations (with respect to the current solution)
-                    parent1_match_orientation = parent1_match_orientations[piece_id]
-                    parent2_match_orientation = parent2_match_orientations[piece_id]
-
-                    for i in range(4):
-                        if parent1_match_orientation is not None and\
-                            parent2_match_orientation is not None:
-
-                            # objective orientations
-                            # (with respect to the original orientation)
-                            parent1_match_orientation -= parent1_orientations[piece_id]
-                            parent1_match_orientation %= 4
-
-                            parent2_match_orientation -= parent2_orientations[piece_id]
-                            parent2_match_orientation %= 4
-
-                            if parent1_match_orientation != parent2_match_orientation:'''
+    print('Mergeable clusters:')
+    print(mergeable_clusters)
+    print('Conflicted clusters:')
+    print(conflicted_clusters)
+    print('-' * 50)
