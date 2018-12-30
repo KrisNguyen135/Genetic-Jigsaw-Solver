@@ -285,11 +285,11 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
                     # objective orientations
                     # (with respect to the original puzzle)
-                    '''parent1_current_orientation = i - parent1_orientations[piece_id]
+                    parent1_current_orientation = i - parent1_orientations[piece_id]
                     parent1_current_orientation %= 4
 
                     parent2_current_orientation = i - parent2_orientations[piece_id]
-                    parent2_match_orientation %= 4'''
+                    parent2_current_orientation %= 4
 
                     if parent1_current_orientation != parent2_current_orientation:
                         return True
@@ -368,7 +368,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     # list of ( cluster_id (parent1), cluster_id (parent2) )
     conflicted_clusters = []
 
-    '''for parent1_cluster_id in parent1_cluster_to_piece_set:
+    for parent1_cluster_id in parent1_cluster_to_piece_set:
         for parent2_cluster_id in parent2_cluster_to_piece_set:
             intersect = parent1_cluster_to_piece_set[parent1_cluster_id].intersection(
                 parent2_cluster_to_piece_set[parent2_cluster_id])
@@ -382,4 +382,4 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     print(mergeable_clusters)
     print('Conflicted clusters:')
     print(conflicted_clusters)
-    print('-' * 50)'''
+    print('-' * 50)
