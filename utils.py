@@ -276,23 +276,27 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     def conflict_check(piece_set_intersection):
         for piece_id in piece_set_intersection:
             # subjective orientations (with respect to the current solution/ind)
-            parent1_match_orientation = parent1_match_orientations[piece_id]
-            parent2_match_orientation = parent2_match_orientations[piece_id]
+            parent1_subjective_orientation = parent1_match_orientations[piece_id]
+            parent2_subjective_orientation = parent2_match_orientations[piece_id]
+
+            # objective orientations (with respect to the original puzzle)
+            parent1_objective_orientation = np.roll(
+                parent1_subjective_orientation, -parent1_orientations[piece_id])
+            parent2_objective_orientation = np.roll(
+                parent2_subjective_orientation, -parent2_orientations[piece_id])
 
             for i in range(4):
-                if parent1_match_orientation[i] is not None and\
-                    parent2_match_orientation[i] is not None:
+                # return False if the piece is matched with two different pieces
+                # in the same direction
+                if parent1_objective_orientation[i] is not None and\
+                    parent2_objective_orientation[i] is not None and\
+                    parent1_objective_orientation[i] != parent2_objective_orientation[i]:
 
-                    # objective orientations
-                    # (with respect to the original puzzle)
-                    parent1_current_orientation = i - parent1_orientations[piece_id]
-                    parent1_current_orientation %= 4
-
-                    parent2_current_orientation = i - parent2_orientations[piece_id]
-                    parent2_current_orientation %= 4
-
-                    if parent1_current_orientation != parent2_current_orientation:
-                        return True
+                    print('Conflicting pieces found')
+                    print(i)
+                    print(parent1_objective_orientation)
+                    print(parent2_objective_orientation)
+                    return True
 
         return False
 
@@ -373,10 +377,13 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
             intersect = parent1_cluster_to_piece_set[parent1_cluster_id].intersection(
                 parent2_cluster_to_piece_set[parent2_cluster_id])
 
-            if conflict_check(intersect):
-                conflicted_clusters.append((parent1_cluster_id, parent2_cluster_id))
-            else:
-                mergeable_clusters[(parent1_cluster_id, parent2_cluster_id)] = intersect
+            if intersect:
+                if conflict_check(intersect):
+                    conflicted_clusters.append((parent1_cluster_id,
+                        parent2_cluster_id))
+                else:
+                    mergeable_clusters[(parent1_cluster_id,
+                        parent2_cluster_id)] = intersect
 
     print('Mergeable clusters:')
     print(mergeable_clusters)
