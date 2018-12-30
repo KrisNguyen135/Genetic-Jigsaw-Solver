@@ -40,7 +40,7 @@ def generate_puzzle(img, n_segments=5, shuffle=True):
 # each individual contains a tuple of:
 # - piece edge vectors (x number of pieces)
 # - indices of the pieces in matrix format
-# - rotation of the pieces in matrix format
+# - rotation of the pieces in an ordered 1d-array
 def generate_init_pop(piece_edges, n_segments, pop_size=100):
     # indices to keep track of in each individual
     indices = np.arange(len(piece_edges))
@@ -57,11 +57,15 @@ def generate_init_pop(piece_edges, n_segments, pop_size=100):
             rotations.append(rotation)
             individual.append(np.roll(piece_edges[index], rotation, axis=0))
 
+        # creating the rotation array
+        sorted_rotation_indices = shuffled_indices.argsort()
+        rotations = np.array(rotations).flatten()[sorted_rotation_indices]
+
         # reshaping the indices and individual
         shuffled_indices = shuffled_indices.reshape((n_segments, n_segments))
         individual = np.array(individual).reshape(
             (n_segments, n_segments, 4, -1))
-        rotations = np.array(rotations).reshape((n_segments, n_segments))
+        #rotations = np.array(rotations).reshape((n_segments, n_segments))
 
         pop.append((individual, shuffled_indices, rotations))
 
@@ -95,8 +99,11 @@ def get_fitness(ind, n_segments):
 
 # drawing the pieces in the order and rotation specified in an individual
 def visualize(pieces, ind, n_segments):
-    indices = ind[1]
+    piece_indices = ind[1]
     rotations = ind[2]
+
+    print(piece_indices)
+    print(rotations)
 
     f, ax = plt.subplots(n_segments, n_segments, figsize=(5, 5))
 
@@ -104,9 +111,9 @@ def visualize(pieces, ind, n_segments):
         for j in range(n_segments):
             ax[i, j].imshow(
                 skimage.transform.rotate(
-                    pieces[indices[i, j]], 90 * rotations[i, j]),
-                cmap = 'gray'
-            )
+                    pieces[piece_indices[i, j]],
+                    90 * rotations[piece_indices[i, j]]),
+                cmap = 'gray')
             ax[i, j].set_xticklabels([])
             ax[i, j].set_yticklabels([])
 
@@ -136,7 +143,8 @@ def generate_threshold(pieces, p=100):
 
 # returns a tuple of the following:
 # - cluster matrix: adjacent matching pieces will have the same index
-# - cluster fitness: average of all differences in adjacent matching pieces
+# - cluster fitnesses: average of all differences in adjacent matching pieces in
+# each cluster
 # - a dictionary mapping a cluster id to a set of piece ids in that cluster
 # - match-orientation array: each piece index maps to a 4-element array
 # containing either `None` (if the specific side is not matched) or
@@ -167,7 +175,6 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
 
     # initializing the match-orientation array
     piece_indices = ind[1]
-    rotations = ind[2]
     match_orientations = np.array([np.array([None for i in range(4)])
         for j in range(piece_indices.size)])
 
@@ -278,13 +285,11 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
                     # objective orientations
                     # (with respect to the original puzzle)
-                    parent1_current_orientation = parent1_match_orientation\
-                        - parent1_orientations[piece_id]
+                    '''parent1_current_orientation = i - parent1_orientations[piece_id]
                     parent1_current_orientation %= 4
 
-                    parent2_current_orientation = parent2_match_orientation\
-                        - parent2_orientations[piece_id]
-                    parent2_match_orientation %= 4
+                    parent2_current_orientation = i - parent2_orientations[piece_id]
+                    parent2_match_orientation %= 4'''
 
                     if parent1_current_orientation != parent2_current_orientation:
                         return True
@@ -322,13 +327,38 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         parent2_match_orientations = get_ind_stats(parent2, threshold, n_segments,
             fitness_matrix_pair=parent2_test_fitness_matrix_pair)
 
+    print('Parent1 piece indices:')
+    print(parent1_piece_indices)
+    print('Parent1 orientations:')
+    print(parent1_orientations)
+    print('Parent1 fitness matrix pair:')
+    print(parent1_test_fitness_matrix_pair[0])
+    print(parent1_test_fitness_matrix_pair[1])
+    print('Parent1 cluster matrix:')
+    print(parent1_cluster_matrix)
+    print('Parent1 cluster fitnesses:')
+    print(parent1_cluster_fitnesses)
     print('Parent1 cluster to piece:')
     print(parent1_cluster_to_piece_set)
+    print('Parent1 match-orientation array:')
+    print(parent1_match_orientations)
     print('-' * 50)
 
-    
+    print('Parent2 piece indices:')
+    print(parent2_piece_indices)
+    print('Parent2 orientations:')
+    print(parent2_orientations)
+    print('Parent2 fitness matrix pair:')
+    print(parent2_test_fitness_matrix_pair[0])
+    print(parent2_test_fitness_matrix_pair[1])
+    print('Parent2 cluster matrix:')
+    print(parent2_cluster_matrix)
+    print('Parent2 cluster fitnesses:')
+    print(parent2_cluster_fitnesses)
     print('Parent2 cluster to piece:')
     print(parent2_cluster_to_piece_set)
+    print('Parent2 match-orientation array:')
+    print(parent2_match_orientations)
     print('-' * 50)
 
 
@@ -338,14 +368,13 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     # list of ( cluster_id (parent1), cluster_id (parent2) )
     conflicted_clusters = []
 
-    for parent1_cluster_id in parent1_cluster_to_piece_set:
+    '''for parent1_cluster_id in parent1_cluster_to_piece_set:
         for parent2_cluster_id in parent2_cluster_to_piece_set:
             intersect = parent1_cluster_to_piece_set[parent1_cluster_id].intersection(
                 parent2_cluster_to_piece_set[parent2_cluster_id])
 
             if conflict_check(intersect):
-                conflicted_clusters.append((parent1_cluster_id,
-                    parent2_cluster_id))
+                conflicted_clusters.append((parent1_cluster_id, parent2_cluster_id))
             else:
                 mergeable_clusters[(parent1_cluster_id, parent2_cluster_id)] = intersect
 
@@ -353,4 +382,4 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     print(mergeable_clusters)
     print('Conflicted clusters:')
     print(conflicted_clusters)
-    print('-' * 50)
+    print('-' * 50)'''

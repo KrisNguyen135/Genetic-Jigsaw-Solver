@@ -48,7 +48,7 @@ if __name__ == '__main__':
     '''ind = (
         piece_edges,
         np.arange(N_SEGMENTS ** 2).reshape((N_SEGMENTS, N_SEGMENTS)),
-        np.zeros((N_SEGMENTS, N_SEGMENTS), dtype=int)
+        np.zeros((N_SEGMENTS * N_SEGMENTS,), dtype=int)
     )
 
     print('Fitness:', get_fitness(ind, N_SEGMENTS))
@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
 
     # generating the initial random population
-    init_pop = generate_init_pop(piece_edges, N_SEGMENTS, pop_size=6000)
+    #init_pop = generate_init_pop(piece_edges, N_SEGMENTS, pop_size=6000)
 
     '''individual = init_pop[0]
     print('First individual in the population:')
@@ -68,8 +68,8 @@ if __name__ == '__main__':
     visualize(pieces, individual, N_SEGMENTS)'''
 
 
-    '''# experimenting with good individuals
-    fitness_matrix_pairs = np.array([
+    # experimenting with good individuals
+    '''fitness_matrix_pairs = np.array([
         get_fitness(ind, N_SEGMENTS) for ind in init_pop])
     fitnesses = np.array([pair[0].sum() + pair[1].sum()
         for pair in fitness_matrix_pairs])
