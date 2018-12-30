@@ -1,7 +1,7 @@
 import numpy as np
 # for testing purposes:
 # seed = 0 when N_SEGMENTS = 2 to get perfect solution
-# seed = 13 when N_SEGMENTS = 13 to get a solution with a pair of matched pieces
+# seed = 13 when N_SEGMENTS = 3 to get a solution with a pair of matched pieces
 np.random.seed(13)
 #import skimage
 #import matplotlib.pyplot as plt
@@ -292,10 +292,11 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
                     parent2_objective_orientation[i] is not None and\
                     parent1_objective_orientation[i] != parent2_objective_orientation[i]:
 
-                    print('Conflicting pieces found')
+                    '''print('Conflicting pieces found')
                     print(i)
                     print(parent1_objective_orientation)
-                    print(parent2_objective_orientation)
+                    print(parent2_objective_orientation)'''
+
                     return True
 
         return False
@@ -320,11 +321,13 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
     parent2_test_fitness_matrix_pair = (np.array([
         [10, 10],
-        [10, 10],
+        #[10, 0], # non-conflicting case
+        [10, 10], # mergeable and conflicting cases
         [10, 10]
     ]), np.array([
         [10, 10, 10],
-        [1, 10, 10]
+        #[1, 10, 10] # non-conflicting and mergeable cases
+        [1.6, 10, 10] # conflicting case
     ])) # used for testing
 
     parent2_cluster_matrix, parent2_cluster_fitnesses, parent2_cluster_to_piece_set,\
@@ -382,11 +385,15 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
                     conflicted_clusters.append((parent1_cluster_id,
                         parent2_cluster_id))
                 else:
-                    mergeable_clusters[(parent1_cluster_id,
-                        parent2_cluster_id)] = intersect
+                    mergeable_clusters[(parent1_cluster_id, parent2_cluster_id)]\
+                        = intersect
 
     print('Mergeable clusters:')
     print(mergeable_clusters)
     print('Conflicted clusters:')
     print(conflicted_clusters)
     print('-' * 50)
+
+
+    # TODO: handle changes in the list of mergeable and conflicted clusters
+    # as a pair of mergeable or a conflicted is processed

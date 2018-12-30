@@ -64,4 +64,10 @@ if __name__ == '__main__':
         [1, 7, 0]
     ]), np.array([0, 3, 3, 2, 0, 1, 0, 1, 0])) # mergeable case'''
 
+    parent2 = (None, np.array([
+        [3, 8, 7],
+        [0, 2, 6],
+        [4, 1, 5]
+    ]), np.array([0, 1, 2, 3, 0, 0, 0, 0, 3])) # conflicting case
+
     generate_offspring(parent1, parent2, 2, N_SEGMENTS)
