@@ -7,8 +7,8 @@ N_SEGMENTS = 3
 if __name__ == '__main__':
 
     # testing get_ind_stats() function
-    # change N_SEGMENTS to appropriate value
-    '''fitness_matrix_pair = (np.array([
+    '''N_SEGMENTS = 5
+    fitness_matrix_pair = (np.array([
         [10, 10, 10, 10],
         [10, 10, 10, 10],
         [10, 10, 0, 1],
@@ -29,8 +29,10 @@ if __name__ == '__main__':
         [20, 21, 22, 23, 24]
     ]), np.zeros((N_SEGMENTS * N_SEGMENTS,), dtype=int))
 
-    cluster_matrix, cluster_fitnesses, cluster_to_piece_set, match_orientations\
-        = get_ind_stats(ind, 2, N_SEGMENTS, fitness_matrix_pair=fitness_matrix_pair)
+    cluster_matrix, cluster_id_set, cluster_fitnesses, cluster_to_piece_set,\
+        match_orientations = get_ind_stats(
+            ind, 2, N_SEGMENTS, fitness_matrix_pair = fitness_matrix_pair
+        )
 
     print('\nPiece indices:')
     print(ind[1])
@@ -38,8 +40,12 @@ if __name__ == '__main__':
     print(ind[2])
     print('\nCluster matrix:')
     print(cluster_matrix)
+    print('\nCluster id set:')
+    print(cluster_id_set)
     print('\nCluster fitnesses:')
     print(cluster_fitnesses)
+    print('\n Cluster to piece')
+    print(cluster_to_piece_set)
     print('\nMatch-orientation array:')
     print(match_orientations)
     print()'''

@@ -143,6 +143,7 @@ def generate_threshold(pieces, p=100):
 
 # returns a tuple of the following:
 # - cluster matrix: adjacent matching pieces will have the same index
+# - cluster id set: set of cluster ids
 # - cluster fitnesses: average of all differences in adjacent matching pieces in
 # each cluster
 # - a dictionary mapping a cluster id to a set of piece ids in that cluster
@@ -179,7 +180,7 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
         for j in range(piece_indices.size)])
 
 
-    # cluster id
+    # initializing cluster id
     cluster_id_set = set()
     id = 1
 
@@ -200,14 +201,19 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
                 elif cluster_matrix[i, j] != 0 and cluster_matrix[i, j + 1] == 0:
                     cluster_matrix[i, j + 1] = cluster_matrix[i, j]
 
-                else:
-                    change_cluster_id(cluster_matrix, cluster_matrix[i, j],
-                        cluster_matrix[i, j + 1])
+                elif cluster_matrix[i, j] != cluster_matrix[i, j + 1]:
+                    cluster_id_set.discard(cluster_matrix[i, j])
+                    change_cluster_id(
+                        cluster_matrix,
+                        cluster_matrix[i, j], cluster_matrix[i, j + 1]
+                    )
 
                 match_orientations[piece_indices[i, j]][1] = (
-                    piece_indices[i, j + 1], fitness_matrix_pair[0][i, j])
+                    piece_indices[i, j + 1], fitness_matrix_pair[0][i, j]
+                )
                 match_orientations[piece_indices[i, j + 1]][3] = (
-                    piece_indices[i, j], fitness_matrix_pair[0][i, j])
+                    piece_indices[i, j], fitness_matrix_pair[0][i, j]
+                )
 
     for i in range(good_match_vertical_matrix.shape[0]):
         for j in range(good_match_vertical_matrix.shape[1]):
@@ -224,14 +230,19 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
                 elif cluster_matrix[i, j] != 0 and cluster_matrix[i + 1, j] == 0:
                     cluster_matrix[i + 1, j] = cluster_matrix[i, j]
 
-                else:
-                    change_cluster_id(cluster_matrix, cluster_matrix[i, j],
-                        cluster_matrix[i + 1, j])
+                elif cluster_matrix[i, j] != cluster_matrix[i + 1, j]:
+                    cluster_id_set.discard(cluster_matrix[i, j])
+                    change_cluster_id(
+                        cluster_matrix,
+                        cluster_matrix[i, j], cluster_matrix[i + 1, j]
+                    )
 
                 match_orientations[piece_indices[i, j]][2] = (
-                    piece_indices[i + 1, j], fitness_matrix_pair[1][i, j])
+                    piece_indices[i + 1, j], fitness_matrix_pair[1][i, j]
+                )
                 match_orientations[piece_indices[i + 1, j]][0] = (
-                    piece_indices[i, j], fitness_matrix_pair[1][i, j])
+                    piece_indices[i, j], fitness_matrix_pair[1][i, j]
+                )
 
 
     # calculating fitness of each cluster
@@ -249,9 +260,6 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
 
                 for item in match_orientations[piece_indices[i, j]]:
                     if item is not None:
-                        #print(cluster_matrix[i, j])
-                        #print(cluster_fitnesses[cluster_matrix[i, j]])
-                        #print(item)
                         cluster_fitnesses[cluster_matrix[i, j]][0] += item[1]
                         cluster_fitnesses[cluster_matrix[i, j]][1] += 1
 
@@ -263,8 +271,8 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
             cluster_fitnesses[id] = fitness_sum / fitness_count
 
 
-    return (cluster_matrix, cluster_fitnesses, cluster_to_piece_set,
-        match_orientations)
+    return (cluster_matrix, cluster_id_set, cluster_fitnesses,
+        cluster_to_piece_set, match_orientations)
 
 
 # TODO: test
@@ -301,6 +309,10 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
         return False
 
+    def transfer_clusters_to_offspring():
+        return
+
+
     # generating stats for both parents
     parent1_piece_indices, parent1_orientations = parent1[1], parent1[2]
 
@@ -313,9 +325,12 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         [10, 10, 10]
     ])) # used for testing
 
-    parent1_cluster_matrix, parent1_cluster_fitnesses, parent1_cluster_to_piece_set,\
-        parent1_match_orientations = get_ind_stats(parent1, threshold, n_segments,
-            fitness_matrix_pair=parent1_test_fitness_matrix_pair)
+    parent1_cluster_matrix, parent1_cluster_id_set, parent1_cluster_fitnesses,\
+        parent1_cluster_to_piece_set, parent1_match_orientations\
+        = get_ind_stats(
+            parent1, threshold, n_segments,
+            fitness_matrix_pair = parent1_test_fitness_matrix_pair
+        )
 
     parent2_piece_indices, parent2_orientations = parent2[1], parent2[2]
 
@@ -330,9 +345,12 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         [1.6, 10, 10] # conflicting case
     ])) # used for testing
 
-    parent2_cluster_matrix, parent2_cluster_fitnesses, parent2_cluster_to_piece_set,\
-        parent2_match_orientations = get_ind_stats(parent2, threshold, n_segments,
-            fitness_matrix_pair=parent2_test_fitness_matrix_pair)
+    parent2_cluster_matrix, parent2_cluster_id_set, parent2_cluster_fitnesses,\
+        parent2_cluster_to_piece_set, parent2_match_orientations\
+        = get_ind_stats(
+            parent2, threshold, n_segments,
+            fitness_matrix_pair = parent2_test_fitness_matrix_pair
+        )
 
     print('Parent1 piece indices:')
     print(parent1_piece_indices)
@@ -343,6 +361,8 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     print(parent1_test_fitness_matrix_pair[1])
     print('Parent1 cluster matrix:')
     print(parent1_cluster_matrix)
+    print('Parent1 cluster id set:')
+    print(parent1_cluster_id_set)
     print('Parent1 cluster fitnesses:')
     print(parent1_cluster_fitnesses)
     print('Parent1 cluster to piece:')
@@ -360,6 +380,8 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     print(parent2_test_fitness_matrix_pair[1])
     print('Parent2 cluster matrix:')
     print(parent2_cluster_matrix)
+    print('Parent2 cluster id set:')
+    print(parent2_cluster_id_set)
     print('Parent2 cluster fitnesses:')
     print(parent2_cluster_fitnesses)
     print('Parent2 cluster to piece:')
@@ -371,10 +393,14 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
     # { ( cluster_id (parent1), cluster_id (parent2) ):
     #    intersection set of piece indices }
-    mergeable_clusters = {}
+    #mergeable_clusters = {}
     # list of ( cluster_id (parent1), cluster_id (parent2) )
+    mergeable_clusters = []
     conflicted_clusters = []
 
+    # for every pair of parent1 cluster id and parent2 cluster id,
+    # check to see if there is a non-empty intersection between the two piece sets,
+    # if so, check to see if there is a conflict in the two sets
     for parent1_cluster_id in parent1_cluster_to_piece_set:
         for parent2_cluster_id in parent2_cluster_to_piece_set:
             intersect = parent1_cluster_to_piece_set[parent1_cluster_id].intersection(
@@ -382,11 +408,15 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
             if intersect:
                 if conflict_check(intersect):
-                    conflicted_clusters.append((parent1_cluster_id,
-                        parent2_cluster_id))
+                    conflicted_clusters.append(
+                        (parent1_cluster_id, parent2_cluster_id)
+                    )
                 else:
-                    mergeable_clusters[(parent1_cluster_id, parent2_cluster_id)]\
-                        = intersect
+                    #mergeable_clusters[(parent1_cluster_id, parent2_cluster_id)]\
+                    #    = intersect
+                    mergeable_clusters.append(
+                        (parent1_cluster_id, parent2_cluster_id)
+                    )
 
     print('Mergeable clusters:')
     print(mergeable_clusters)
@@ -395,5 +425,25 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     print('-' * 50)
 
 
-    # TODO: handle changes in the list of mergeable and conflicted clusters
-    # as a pair of mergeable or a conflicted is processed
+    # set of cluster ids acceptable and non-conflicting with one another
+    parent1_good_cluster_set = parent1_cluster_id_set.copy()
+    parent2_good_cluster_set = parent2_cluster_id_set.copy()
+
+    for parent1_cluster_id, parent2_cluster_id in conflicted_clusters:
+        if parent1_cluster_fitnesses[parent1_cluster_id]\
+            < parent2_cluster_fitnesses[parent2_cluster_id]:
+
+            parent2_good_cluster_set.discard(parent2_cluster_id)
+        else:
+            parent2_good_cluster_set.add(parent2_cluster_id)
+
+    print('Parent1 set of good clusters:')
+    print(parent1_good_cluster_set)
+    print('Parent2 set of good clusters:')
+    print(parent2_good_cluster_set)
+
+
+    # TODO: transfer good clusters to the offspring in an efficient way
+    # maybe add in clusters one by one, mergeable clusters have to be added
+    # in together
+    # (modify the method at the top)
