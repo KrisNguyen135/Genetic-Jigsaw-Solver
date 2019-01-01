@@ -141,6 +141,15 @@ def generate_threshold(pieces, p=100):
     return np.percentile(differences, p)
 
 
+# mutates the cluster matrix
+# changes every occurence of the target id to the result id
+def change_cluster_id(cluster_matrix, target_id, result_id):
+    for i in range(cluster_matrix.shape[0]):
+        for j in range(cluster_matrix.shape[1]):
+            if cluster_matrix[i, j] == target_id:
+                cluster_matrix[i, j] = result_id
+
+
 # returns a tuple of the following:
 # - cluster matrix: adjacent matching pieces will have the same index
 # - cluster id set: set of cluster ids
@@ -154,16 +163,6 @@ def generate_threshold(pieces, p=100):
 # the orientations are individually-specific and don't correspond to the
 # original orientations
 def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
-
-    # mutates the cluster matrix
-    # changes every occurence of the target id to the result id
-    def change_cluster_id(cluster_matrix, target_id, result_id):
-        for i in range(cluster_matrix.shape[0]):
-            for j in range(cluster_matrix.shape[1]):
-                if cluster_matrix[i, j] == target_id:
-                    cluster_matrix[i, j] = result_id
-
-
     # obtaining the fitness matrix
     if fitness_matrix_pair is None:
         fitness_matrix_pair = get_fitness(ind, n_segments)
@@ -202,7 +201,7 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
                     cluster_matrix[i, j + 1] = cluster_matrix[i, j]
 
                 elif cluster_matrix[i, j] != cluster_matrix[i, j + 1]:
-                    cluster_id_set.discard(cluster_matrix[i, j])
+                    cluster_id_set.remove(cluster_matrix[i, j])
                     change_cluster_id(
                         cluster_matrix,
                         cluster_matrix[i, j], cluster_matrix[i, j + 1]
@@ -231,7 +230,7 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
                     cluster_matrix[i + 1, j] = cluster_matrix[i, j]
 
                 elif cluster_matrix[i, j] != cluster_matrix[i + 1, j]:
-                    cluster_id_set.discard(cluster_matrix[i, j])
+                    cluster_id_set.remove(cluster_matrix[i, j])
                     change_cluster_id(
                         cluster_matrix,
                         cluster_matrix[i, j], cluster_matrix[i + 1, j]
@@ -278,6 +277,45 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
 # TODO: test
 def generate_offspring(parent1, parent2, threshold, n_segments):
 
+    def print_parents_info():
+        print('Parent1 piece indices:')
+        print(parent1_piece_indices)
+        print('Parent1 orientations:')
+        print(parent1_orientations)
+        print('Parent1 fitness matrix pair:')
+        print(parent1_test_fitness_matrix_pair[0])
+        print(parent1_test_fitness_matrix_pair[1])
+        print('Parent1 cluster matrix:')
+        print(parent1_cluster_matrix)
+        print('Parent1 cluster id set:')
+        print(parent1_cluster_id_set)
+        print('Parent1 cluster fitnesses:')
+        print(parent1_cluster_fitnesses)
+        print('Parent1 cluster to piece:')
+        print(parent1_cluster_to_piece_set)
+        print('Parent1 match-orientation array:')
+        print(parent1_match_orientations)
+        print('-' * 50)
+
+        print('Parent2 piece indices:')
+        print(parent2_piece_indices)
+        print('Parent2 orientations:')
+        print(parent2_orientations)
+        print('Parent2 fitness matrix pair:')
+        print(parent2_test_fitness_matrix_pair[0])
+        print(parent2_test_fitness_matrix_pair[1])
+        print('Parent2 cluster matrix:')
+        print(parent2_cluster_matrix)
+        print('Parent2 cluster id set:')
+        print(parent2_cluster_id_set)
+        print('Parent2 cluster fitnesses:')
+        print(parent2_cluster_fitnesses)
+        print('Parent2 cluster to piece:')
+        print(parent2_cluster_to_piece_set)
+        print('Parent2 match-orientation array:')
+        print(parent2_match_orientations)
+        print('-' * 50)
+
     # precondition: intersection is not empty
     # returns True if there is a real conflict
     # returns False if the clusters are mergeable
@@ -300,17 +338,26 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
                     parent2_objective_orientation[i] is not None and\
                     parent1_objective_orientation[i] != parent2_objective_orientation[i]:
 
-                    '''print('Conflicting pieces found')
-                    print(i)
-                    print(parent1_objective_orientation)
-                    print(parent2_objective_orientation)'''
-
                     return True
 
         return False
 
-    def transfer_clusters_to_offspring():
-        return
+
+    # remove information regarding a specific cluster id from all ind stats
+    def remove_cluster(cluster_id, piece_indices, cluster_matrix, cluster_id_set,
+                       cluster_fitnesses, cluster_to_piece_set, match_orientations):
+
+        for i in range(cluster_matrix.shape[0]):
+            for j in range(cluster_matrix.shape[1]):
+                if cluster_matrix[i, j] == cluster_id:
+                    match_orientations[piece_indices[i, j]] = np.array(
+                        [None for i in range(4)]
+                    )
+
+        change_cluster_id(cluster_matrix, cluster_id, 0)
+        cluster_id_set.remove(cluster_id)
+        del cluster_fitnesses[cluster_id]
+        del cluster_to_piece_set[cluster_id]
 
 
     # generating stats for both parents
@@ -352,43 +399,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
             fitness_matrix_pair = parent2_test_fitness_matrix_pair
         )
 
-    print('Parent1 piece indices:')
-    print(parent1_piece_indices)
-    print('Parent1 orientations:')
-    print(parent1_orientations)
-    print('Parent1 fitness matrix pair:')
-    print(parent1_test_fitness_matrix_pair[0])
-    print(parent1_test_fitness_matrix_pair[1])
-    print('Parent1 cluster matrix:')
-    print(parent1_cluster_matrix)
-    print('Parent1 cluster id set:')
-    print(parent1_cluster_id_set)
-    print('Parent1 cluster fitnesses:')
-    print(parent1_cluster_fitnesses)
-    print('Parent1 cluster to piece:')
-    print(parent1_cluster_to_piece_set)
-    print('Parent1 match-orientation array:')
-    print(parent1_match_orientations)
-    print('-' * 50)
-
-    print('Parent2 piece indices:')
-    print(parent2_piece_indices)
-    print('Parent2 orientations:')
-    print(parent2_orientations)
-    print('Parent2 fitness matrix pair:')
-    print(parent2_test_fitness_matrix_pair[0])
-    print(parent2_test_fitness_matrix_pair[1])
-    print('Parent2 cluster matrix:')
-    print(parent2_cluster_matrix)
-    print('Parent2 cluster id set:')
-    print(parent2_cluster_id_set)
-    print('Parent2 cluster fitnesses:')
-    print(parent2_cluster_fitnesses)
-    print('Parent2 cluster to piece:')
-    print(parent2_cluster_to_piece_set)
-    print('Parent2 match-orientation array:')
-    print(parent2_match_orientations)
-    print('-' * 50)
+    print_parents_info()
 
 
     # { ( cluster_id (parent1), cluster_id (parent2) ):
@@ -426,7 +437,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
 
     # set of cluster ids acceptable and non-conflicting with one another
-    parent1_good_cluster_set = parent1_cluster_id_set.copy()
+    '''parent1_good_cluster_set = parent1_cluster_id_set.copy()
     parent2_good_cluster_set = parent2_cluster_id_set.copy()
 
     for parent1_cluster_id, parent2_cluster_id in conflicted_clusters:
@@ -435,13 +446,72 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
             parent2_good_cluster_set.discard(parent2_cluster_id)
         else:
-            parent2_good_cluster_set.add(parent2_cluster_id)
+            parent1_good_cluster_set.discard(parent1_cluster_id)
 
     print('Parent1 set of good clusters:')
     print(parent1_good_cluster_set)
     print('Parent2 set of good clusters:')
-    print(parent2_good_cluster_set)
+    print(parent2_good_cluster_set)'''
 
+    # keeping track of bad clusters and remove them from ind stats of both parents
+    parent1_clusters_to_remove = set()
+    parent2_clusters_to_remove = set()
+    for parent1_cluster_id, parent2_cluster_id in conflicted_clusters:
+        if parent1_cluster_fitnesses[parent1_cluster_id]\
+            < parent2_cluster_fitnesses[parent2_cluster_id]:
+
+            parent2_clusters_to_remove.add(parent2_cluster_id)
+        else:
+            parent1_clusters_to_remove.add(parent1_cluster_id)
+
+    print('Parent1 clusters to remove:')
+    print(parent1_clusters_to_remove)
+    print('Parent2 clusters to remove:')
+    print(parent2_clusters_to_remove)
+
+    for cluster_id in parent1_clusters_to_remove:
+        remove_cluster(
+            cluster_id, parent1_piece_indices, parent1_cluster_matrix,
+            parent1_cluster_id_set, parent1_cluster_fitnesses,
+            parent1_cluster_to_piece_set, parent1_match_orientations
+        )
+    for cluster_id in parent2_clusters_to_remove:
+        remove_cluster(
+            cluster_id, parent2_piece_indices, parent2_cluster_matrix,
+            parent2_cluster_id_set, parent2_cluster_fitnesses,
+            parent2_cluster_to_piece_set, parent2_match_orientations
+        )
+
+    print('======After removing bad clusters======')
+    print_parents_info()
+
+    # transferring match-orientation arrays from parents to child
+    '''child_objective_match_orientations = np.array(
+        [np.array([None for i in range(4)])
+            for j in range(n_segments * n_segments)]
+    )
+
+    for piece_id in range(n_segments * n_segments):
+        # subjective orientations (with respect to the current solution/ind)
+        parent1_subjective_orientation = parent1_match_orientations[piece_id]
+        parent2_subjective_orientation = parent2_match_orientations[piece_id]
+
+        # objective orientations (with respect to the original puzzle)
+        parent1_objective_orientation = np.roll(
+            parent1_subjective_orientation, -parent1_orientations[piece_id]
+        )
+        parent2_objective_orientation = np.roll(
+            parent2_subjective_orientation, -parent2_orientations[piece_id]
+        )
+
+        for i in range(4):
+            if parent1_objective_orientation[i] is not None:
+                child_objective_match_orientations[piece_id][i]\
+                    = parent1_objective_orientation[i]
+
+            if parent2_objective_orientation[i] is not None:
+                child_objective_match_orientations[piece_id][i]\
+                    = parent2_objective_orientation[i]'''
 
     # TODO: transfer good clusters to the offspring in an efficient way
     # maybe add in clusters one by one, mergeable clusters have to be added
