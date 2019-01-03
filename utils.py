@@ -388,8 +388,8 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         [10, 10]
     ]), np.array([
         [10, 10, 10],
-        #[1, 10, 10] # non-conflicting and mergeable cases
-        [1.6, 10, 10] # conflicting case
+        [1, 10, 10] # non-conflicting and mergeable cases
+        #[1.6, 10, 10] # conflicting case
     ])) # used for testing
 
     parent2_cluster_matrix, parent2_cluster_id_set, parent2_cluster_fitnesses,\
@@ -406,7 +406,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     #    intersection set of piece indices }
     #mergeable_clusters = {}
     # list of ( cluster_id (parent1), cluster_id (parent2) )
-    mergeable_clusters = []
+    #mergeable_clusters = []
     conflicted_clusters = []
 
     # for every pair of parent1 cluster id and parent2 cluster id,
@@ -422,36 +422,19 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
                     conflicted_clusters.append(
                         (parent1_cluster_id, parent2_cluster_id)
                     )
-                else:
+                '''else:
                     #mergeable_clusters[(parent1_cluster_id, parent2_cluster_id)]\
                     #    = intersect
                     mergeable_clusters.append(
                         (parent1_cluster_id, parent2_cluster_id)
-                    )
+                    )'''
 
-    print('Mergeable clusters:')
-    print(mergeable_clusters)
+    #print('Mergeable clusters:')
+    #print(mergeable_clusters)
     print('Conflicted clusters:')
     print(conflicted_clusters)
     print('-' * 50)
 
-
-    # set of cluster ids acceptable and non-conflicting with one another
-    '''parent1_good_cluster_set = parent1_cluster_id_set.copy()
-    parent2_good_cluster_set = parent2_cluster_id_set.copy()
-
-    for parent1_cluster_id, parent2_cluster_id in conflicted_clusters:
-        if parent1_cluster_fitnesses[parent1_cluster_id]\
-            < parent2_cluster_fitnesses[parent2_cluster_id]:
-
-            parent2_good_cluster_set.discard(parent2_cluster_id)
-        else:
-            parent1_good_cluster_set.discard(parent1_cluster_id)
-
-    print('Parent1 set of good clusters:')
-    print(parent1_good_cluster_set)
-    print('Parent2 set of good clusters:')
-    print(parent2_good_cluster_set)'''
 
     # keeping track of bad clusters and remove them from ind stats of both parents
     parent1_clusters_to_remove = set()
@@ -486,7 +469,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     print_parents_info()
 
     # transferring match-orientation arrays from parents to child
-    '''child_objective_match_orientations = np.array(
+    child_objective_match_orientations = np.array(
         [np.array([None for i in range(4)])
             for j in range(n_segments * n_segments)]
     )
@@ -511,7 +494,10 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
             if parent2_objective_orientation[i] is not None:
                 child_objective_match_orientations[piece_id][i]\
-                    = parent2_objective_orientation[i]'''
+                    = parent2_objective_orientation[i]
+
+    print('======Child objective match-orientation array======')
+    print(child_objective_match_orientations)
 
     # TODO: transfer good clusters to the offspring in an efficient way
     # maybe add in clusters one by one, mergeable clusters have to be added
