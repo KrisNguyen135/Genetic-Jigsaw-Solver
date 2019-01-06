@@ -65,25 +65,25 @@ if __name__ == '__main__':
         [7, 3, 8]
     ]), np.array([2, 1, 3, 0, 0, 3, 3, 0, 2]))'''
 
-    '''# mergeable case
-    parent2 = (None, np.array([
+    # mergeable case
+    '''parent2 = (None, np.array([
         [3, 4, 6],
         [2, 5, 8],
         [1, 7, 0]
     ]), np.array([0, 3, 3, 2, 0, 1, 0, 1, 0]))'''
 
-    '''# conflicting case
+    # conflicting case
     parent2 = (None, np.array([
         [3, 8, 7],
         [0, 2, 6],
         [4, 1, 5]
-    ]), np.array([0, 1, 2, 3, 0, 0, 0, 0, 3]))'''
+    ]), np.array([0, 1, 2, 3, 0, 0, 0, 0, 3]))
 
     # mergeable multiple common pieces case
-    parent2 = (None, np.array([
+    '''parent2 = (None, np.array([
         [1, 2, 6],
         [0, 8, 5],
         [3, 7, 4]
-    ]), np.array([0, 3, 2, 0, 0, 1, 2, 2, 0]))
+    ]), np.array([0, 3, 2, 0, 0, 1, 2, 2, 0]))'''
 
     generate_offspring(parent1, parent2, 2, N_SEGMENTS)

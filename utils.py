@@ -342,7 +342,6 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
         return False
 
-
     # remove information regarding a specific cluster id from all ind stats
     def remove_cluster(cluster_id, piece_indices, cluster_matrix, cluster_id_set,
                        cluster_fitnesses, cluster_to_piece_set, match_orientations):
@@ -358,6 +357,13 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         cluster_id_set.remove(cluster_id)
         del cluster_fitnesses[cluster_id]
         del cluster_to_piece_set[cluster_id]
+
+    # takes in a child's objective match-orientation array and
+    # returns a random solution that preserves all good clusters
+    # this in the form of (indices, orientations)
+    def generate_child_stats(child_objective_match_orientations):
+        cluster_id_set = set()
+        cluster_to_piece_set = {}
 
 
     # generating stats for both parents
@@ -388,8 +394,8 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         [10, 10]
     ]), np.array([
         [10, 10, 10],
-        [1, 10, 10] # non-conflicting and mergeable cases
-        #[1.6, 10, 10] # conflicting case
+        #[1, 10, 10] # non-conflicting and mergeable cases
+        [1.6, 10, 10] # conflicting case
     ])) # used for testing
 
     parent2_cluster_matrix, parent2_cluster_id_set, parent2_cluster_fitnesses,\
