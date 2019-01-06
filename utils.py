@@ -365,6 +365,10 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         cluster_id_set = set()
         cluster_to_piece_set = {}
 
+        id = 1
+        for piece_id in range(len(child_objective_match_orientations)):
+
+
 
     # generating stats for both parents
     parent1_piece_indices, parent1_orientations = parent1[1], parent1[2]
@@ -505,7 +509,9 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     print('======Child objective match-orientation array======')
     print(child_objective_match_orientations)
 
-    # TODO: transfer good clusters to the offspring in an efficient way
-    # maybe add in clusters one by one, mergeable clusters have to be added
-    # in together
-    # (modify the method at the top)
+    # TODO: finish generate_child_stats()
+
+    # TODO:
+    # transfer good clusters to the offspring in an efficient way
+    # maybe add in clusters one by one, mergeable clusters have to
+    # be added in together

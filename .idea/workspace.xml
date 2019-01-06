@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ee30eecc-a9fa-4bda-ab84-4bd996695f66" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/__pycache__/utils.cpython-37.pyc" beforeDir="false" afterPath="$PROJECT_DIR$/__pycache__/utils.cpython-37.pyc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -18,31 +15,13 @@
     <splitter split-orientation="horizontal" split-proportion="0.5">
       <split-first>
         <leaf>
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/test.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="439">
-                  <caret line="79" column="46" lean-forward="true" selection-start-line="79" selection-start-column="46" selection-end-line="79" selection-end-column="46" />
+                <state relative-caret-position="417">
+                  <caret line="79" column="46" selection-start-line="79" selection-start-column="46" selection-end-line="79" selection-end-column="46" />
                   <folding>
                     <element signature="e#0#18#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/utils.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-1833">
-                  <caret line="351" column="52" selection-start-line="351" selection-start-column="52" selection-end-line="351" selection-end-column="52" />
-                  <folding>
-                    <element signature="e#344#1135#0" />
-                    <element signature="e#1418#2535#0" />
-                    <element signature="e#2825#3516#0" />
-                    <element signature="e#3637#4194#0" />
-                    <element signature="e#4440#4897#0" />
-                    <element signature="e#5054#5242#0" />
-                    <element signature="e#10587#12071#0" />
                   </folding>
                 </state>
               </provider>
@@ -52,11 +31,11 @@
       </split-first>
       <split-second>
         <leaf>
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/utils.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="395">
-                  <caret line="365" column="32" lean-forward="true" selection-start-line="365" selection-start-column="32" selection-end-line="365" selection-end-column="32" />
+                <state relative-caret-position="511">
+                  <caret line="369" column="12" selection-start-line="369" selection-start-column="12" selection-end-line="369" selection-end-column="12" />
                   <folding>
                     <element signature="e#344#1135#0" />
                     <element signature="e#1418#2535#0" />
@@ -66,15 +45,6 @@
                     <element signature="e#5054#5242#0" />
                     <element signature="e#10587#12071#0" />
                   </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/.gitignore">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="165">
-                  <caret line="11" column="6" selection-start-line="11" selection-start-column="6" selection-end-line="11" selection-end-column="6" />
                 </state>
               </provider>
             </entry>
@@ -90,8 +60,8 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/test.py" />
-        <option value="$PROJECT_DIR$/utils.py" />
         <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/utils.py" />
       </list>
     </option>
   </component>
@@ -123,7 +93,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -182,7 +152,7 @@
     <frame x="-1920" y="-73" width="1920" height="977" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1913646" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1913646" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info id="Run" order="3" weight="0.27771854" />
@@ -194,7 +164,7 @@
       <window_info anchor="bottom" id="TODO" order="5" />
       <window_info anchor="bottom" id="Version Control" order="6" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
-      <window_info anchor="bottom" id="Python Console" order="8" visible="true" weight="0.202718" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="8" visible="true" weight="0.202718" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -204,10 +174,17 @@
     </layout>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="439">
-          <caret line="79" column="46" lean-forward="true" selection-start-line="79" selection-start-column="46" selection-end-line="79" selection-end-column="46" />
+        <state relative-caret-position="417">
+          <caret line="79" column="46" selection-start-line="79" selection-start-column="46" selection-end-line="79" selection-end-column="46" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
@@ -216,8 +193,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="395">
-          <caret line="365" column="32" lean-forward="true" selection-start-line="365" selection-start-column="32" selection-end-line="365" selection-end-column="32" />
+        <state relative-caret-position="511">
+          <caret line="369" column="12" selection-start-line="369" selection-start-column="12" selection-end-line="369" selection-end-column="12" />
           <folding>
             <element signature="e#344#1135#0" />
             <element signature="e#1418#2535#0" />
@@ -227,13 +204,6 @@
             <element signature="e#5054#5242#0" />
             <element signature="e#10587#12071#0" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="11" column="6" selection-start-line="11" selection-start-column="6" selection-end-line="11" selection-end-column="6" />
         </state>
       </provider>
     </entry>
