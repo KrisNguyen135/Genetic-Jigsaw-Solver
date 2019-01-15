@@ -73,17 +73,17 @@ if __name__ == '__main__':
     ]), np.array([0, 3, 3, 2, 0, 1, 0, 1, 0]))'''
 
     # conflicting case
-    parent2 = (None, np.array([
+    '''parent2 = (None, np.array([
         [3, 8, 7],
         [0, 2, 6],
         [4, 1, 5]
-    ]), np.array([0, 1, 2, 3, 0, 0, 0, 0, 3]))
+    ]), np.array([0, 1, 2, 3, 0, 0, 0, 0, 3]))'''
 
     # mergeable multiple common pieces case
-    '''parent2 = (None, np.array([
+    parent2 = (None, np.array([
         [1, 2, 6],
         [0, 8, 5],
         [3, 7, 4]
-    ]), np.array([0, 3, 2, 0, 0, 1, 2, 2, 0]))'''
+    ]), np.array([0, 3, 2, 0, 0, 1, 2, 2, 0]))
 
     generate_offspring(parent1, parent2, 2, N_SEGMENTS)

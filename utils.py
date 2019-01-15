@@ -426,8 +426,8 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         [10, 10]
     ]), np.array([
         [10, 10, 10],
-        #[1, 10, 10] # non-conflicting and mergeable cases
-        [1.6, 10, 10] # conflicting case
+        [1, 10, 10] # non-conflicting and mergeable cases
+        #[1.6, 10, 10] # conflicting case
     ])) # used for testing
 
     parent2_cluster_matrix, parent2_cluster_id_set, parent2_cluster_fitnesses,\
