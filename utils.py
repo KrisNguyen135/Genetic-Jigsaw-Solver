@@ -75,7 +75,7 @@ def generate_init_pop(piece_edges, n_segments, pop_size=100):
 # returns two 2d arrays (matrices) holding differences between adjacent pieces
 # in an individual in a given population
 # the first matrix has `n_segments` rows and `n_segments - 1` columns, holding
-# differences between horizonally adjacent pieces
+# differences between horizontally adjacent pieces
 def get_fitness(ind, n_segments):
     # simple square of difference
     def get_difference(edge1, edge2):
@@ -360,8 +360,74 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
     # takes in a child's objective match-orientation array and
     # returns a random solution that preserves all good clusters
-    # this in the form of (indices, orientations)
+    # in the form of (indices, orientations)
     def generate_child(child_objective_match_orientations):
+
+        def combine_clusters():
+
+            def recur_insert_piece(piece_id, row, col):
+                if piece_id not in remain_piece_set:
+                    return True
+
+                # TODO: handle out-of-bound `row` and `col`
+
+                if indices[row, col] is None:
+                    indices[row, col] = piece_id
+                    remain_piece_set.remove(piece_id) # TODO: check if it has to be global
+
+                    for i in range(4):
+                        match_orientation = child_subjective_match_orientations[piece_id][i]
+                        if match_orientation is not None:
+
+                            match_piece_id, _ = match_orientation
+                            # TODO: handle when recur_insert_piece() returns `False`
+                            if i == 0:
+                                recur_insert_piece(match_piece_id, row - 1, col)
+                            elif i == 1:
+                                recur_insert_piece(match_piece_id, row, col + 1)
+                            elif i == 2:
+                                recur_insert_piece(match_piece_id, row + 1, col)
+                            else:
+                                recur_insert_piece(match_piece_id, row, col - 1)
+
+            # generating random orientation for each cluster
+            cluster_id_set = set(piece_cluster_id)
+            cluster_id_set.remove(0)
+            cluster_to_orientation = {
+                cluster_id: np.random.randint(0, 4) for cluster_id in cluster_id_set
+            }
+
+            # creating the subjective match-orientation array
+            child_subjective_match_orientations = []
+            for i, match_orientation in enumerate(child_objective_match_orientations):
+                if piece_cluster_id[i] != 0:
+                    child_subjective_match_orientations.append(np.roll(
+                        match_orientation, cluster_to_orientation[piece_cluster_id[i]]
+                    ))
+                else:
+                    child_subjective_match_orientations.append(match_orientation)
+
+            child_subjective_match_orientations = np.array(child_subjective_match_orientations)
+
+            # print('\nCluster ID to orientation dictionary:')
+            # print(cluster_to_orientation)
+            # print('\nChild subjective match-orientation array:')
+            # print(child_subjective_match_orientations)
+
+            # start combining clusters in a index matrix
+            indices = np.array([[
+                None for _ in range(n_segments)
+            ] for __ in range(n_segments)])
+
+            orientations = np.array([
+                None for _ in range(n_segments * n_segments)
+            ])
+
+            remain_piece_set = set([i for i in range(n_segments)])
+
+
+
+        # assigning matched pieces with the same cluster id
         piece_cluster_id = np.zeros(
             (len(child_objective_match_orientations,)), dtype=int
         )
@@ -392,30 +458,10 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
                                 piece_cluster_id[i]\
                                     = piece_cluster_id[piece_id]
 
-        print('Piece-wise cluster id array:')
-        print(piece_cluster_id)
+        #print('\nPiece-wise cluster id array:')
+        #print(piece_cluster_id)
 
-        cluster_id_set = set(piece_cluster_id)
-        cluster_id_set.remove(0)
-        cluster_to_orientation = {
-            cluster_id: np.random.randint(0, 4) for cluster_id in cluster_id_set
-        }
-
-        child_subjective_match_orientations = []
-        for i, match_orientation in enumerate(child_objective_match_orientations):
-            if piece_cluster_id[i] != 0:
-                child_subjective_match_orientations.append(np.roll(
-                    match_orientation, cluster_to_orientation[piece_cluster_id[i]]
-                ))
-            else:
-                child_subjective_match_orientations.append(match_orientation)
-
-        child_subjective_match_orientations = np.array(child_subjective_match_orientations)
-
-        print('Cluster ID to orientation dictionary:')
-        print(cluster_to_orientation)
-        print('Child subjective match-orientation array:')
-        print(child_subjective_match_orientations)
+        # generating a random solution while preserving good matches
 
     # generating stats for both parents
     parent1_piece_indices, parent1_orientations = parent1[1], parent1[2]
@@ -459,11 +505,6 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     print_parents_info()
 
 
-    # { ( cluster_id (parent1), cluster_id (parent2) ):
-    #    intersection set of piece indices }
-    #mergeable_clusters = {}
-    # list of ( cluster_id (parent1), cluster_id (parent2) )
-    #mergeable_clusters = []
     conflicted_clusters = []
 
     # for every pair of parent1 cluster id and parent2 cluster id,

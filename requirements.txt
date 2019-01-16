@@ -2,3 +2,4 @@ numpy
 scikit-image==0.14.1
 jupyter
 notebook
+matplotlib
