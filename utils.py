@@ -365,8 +365,6 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         piece_cluster_id = np.zeros(
             (len(child_objective_match_orientations,)), dtype=int
         )
-        #piece_to_cluster_id = {}
-        #cluster_to_piece_set = {}
 
         id = 1
         for piece_id in range(len(child_objective_match_orientations)):
@@ -397,6 +395,27 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         print('Piece-wise cluster id array:')
         print(piece_cluster_id)
 
+        cluster_id_set = set(piece_cluster_id)
+        cluster_id_set.remove(0)
+        cluster_to_orientation = {
+            cluster_id: np.random.randint(0, 4) for cluster_id in cluster_id_set
+        }
+
+        child_subjective_match_orientations = []
+        for i, match_orientation in enumerate(child_objective_match_orientations):
+            if piece_cluster_id[i] != 0:
+                child_subjective_match_orientations.append(np.roll(
+                    match_orientation, cluster_to_orientation[piece_cluster_id[i]]
+                ))
+            else:
+                child_subjective_match_orientations.append(match_orientation)
+
+        child_subjective_match_orientations = np.array(child_subjective_match_orientations)
+
+        print('Cluster ID to orientation dictionary:')
+        print(cluster_to_orientation)
+        print('Child subjective match-orientation array:')
+        print(child_subjective_match_orientations)
 
     # generating stats for both parents
     parent1_piece_indices, parent1_orientations = parent1[1], parent1[2]
@@ -421,8 +440,8 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
     parent2_test_fitness_matrix_pair = (np.array([
         [10, 10],
-        #[10, 0], # non-conflicting case
-        [10, 10], # mergeable and conflicting cases
+        [10, 0], # non-conflicting case
+        #[10, 10], # mergeable and conflicting cases
         [10, 10]
     ]), np.array([
         [10, 10, 10],
