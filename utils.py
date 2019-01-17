@@ -365,34 +365,173 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
         def combine_clusters():
 
-            def recur_insert_piece(piece_id, row, col):
+            # global variables for the solution
+            indices = np.array([[
+                None for _ in range(n_segments)
+            ] for __ in range(n_segments)])
+
+            orientations = np.array([
+                None for _ in range(n_segments * n_segments)
+            ])
+
+            remain_piece_set = set([i for i in range(n_segments)])
+
+            # tries to shift all pieces in a cluster in the current
+            # solution in a direction
+            # direction parameter is clockwise, starting from 0 -> up
+            # returns None if shifted
+            # returns 0 if conflicting with bounds
+            # NA: returns cluster id set if conflicting with other clusters
+            def recur_shift_cluster(cluster_id, direction):
+                # finding appropriate delta x and y
+                row_change = 0
+                col_change = 0
+                if direction == 0:
+                    row_change -= 1
+                elif direction == 1:
+                    col_change += 1
+                elif direction == 2:
+                    row_change += 1
+                else:
+                    col_change -= 1
+
+                # finding potential conflicts
+                bound_conflict = False
+                cluster_conflict = False
+                conflicting_cluster_id_set = set()
+
+                for row in range(n_segments):
+                    if bound_conflict:
+                        break
+
+                    for col in range(n_segments):
+                        if indices[row, col] in cluster_to_piece_set[cluster_id]:
+                            new_row = row + row_change
+                            new_col = col + col_change
+
+                            if new_row < 0 or new_row >= n_segments:
+                                bound_conflict = True
+                                break
+                            elif new_col < 0 or new_col >= n_segments:
+                                bound_conflict = True
+                                break
+
+                            elif indices[new_row, new_col] is not None:
+                                cluster_conflict = True
+                                conflicting_cluster_id_set.add(
+                                    piece_cluster_id[indices[new_row, new_col]]
+                                )
+
+                # handling potential conflicts
+                if bound_conflict:
+                    return 0
+                if cluster_conflict:
+                    #return conflicting_cluster_id_set
+                    for conflicting_cluster_id in conflicting_cluster_id_set:
+                        recur_shift_result = recur_shift_cluster(
+                            conflicting_cluster_id, direction
+                        )
+                        if recur_shift_result == 0:
+                            return 0
+
+                # if there is no conflict
+                # shifting all targeted pieces
+                for row in range(n_segments):
+                    for col in range(n_segments):
+                        if indices[row, col] in cluster_to_piece_set[cluster_id]:
+                            new_row = row + row_change
+                            new_col = col + col_change
+
+                            indices[new_row, new_col] = indices[row, col]
+                            indices[row, col] = None
+
+            # returns None if successful
+            # returns 0 if the insertion is recursively impossible
+            def recur_insert_piece(piece_id, row, col, direction):
                 if piece_id not in remain_piece_set:
-                    return True
+                    return
 
-                # TODO: handle out-of-bound `row` and `col`
+                # if out of bound, shift the whole cluster
+                # in opposite direction
+                if row < 0 or row >= n_segments\
+                    or col < 0 or col >= n_segments:
 
+                    recur_shift_result = recur_shift_cluster(
+                        piece_cluster_id[piece_id],
+                        (direction + 2) % 4
+                    )
+
+                    if recur_shift_result == 0:
+                        return 0
+
+                    # attempts to insert the piece again
+                    # after the shift
+                    if direction == 0:
+                        return recur_insert_piece(piece_id, row + 1, col, 0)
+                    elif direction == 1:
+                        return recur_insert_piece(piece_id, row, col - 1, 1)
+                    elif direction == 2:
+                        return recur_insert_piece(piece_id, row - 1, col, 2)
+                    else:
+                        return recur_insert_piece(piece_id, row, col + 1, 3)
+
+                # if the current cell is empty
                 if indices[row, col] is None:
                     indices[row, col] = piece_id
                     remain_piece_set.remove(piece_id) # TODO: check if it has to be global
 
                     for i in range(4):
                         match_orientation = child_subjective_match_orientations[piece_id][i]
-                        if match_orientation is not None:
 
+                        if match_orientation is not None:
                             match_piece_id, _ = match_orientation
-                            # TODO: handle when recur_insert_piece() returns `False`
                             if i == 0:
-                                recur_insert_piece(match_piece_id, row - 1, col)
+                                return recur_insert_piece(match_piece_id, row - 1, col, 0)
                             elif i == 1:
-                                recur_insert_piece(match_piece_id, row, col + 1)
+                                return recur_insert_piece(match_piece_id, row, col + 1, 1)
                             elif i == 2:
-                                recur_insert_piece(match_piece_id, row + 1, col)
+                                return recur_insert_piece(match_piece_id, row + 1, col, 2)
                             else:
-                                recur_insert_piece(match_piece_id, row, col - 1)
+                                return recur_insert_piece(match_piece_id, row, col - 1, 3)
+
+                # if there is a conflict with another cluster
+                else:
+                    saved_indices = np.copy(indices)
+
+                    # try shifting the conflicting cluster
+                    # in the same direction
+                    recur_shift_result = recur_shift_cluster(
+                        piece_cluster_id[indices[row, col]], direction
+                    )
+                    # if successful, attempts to insert the piece again
+                    # after the shift
+                    if recur_shift_result is None:
+                        return recur_insert_piece(piece_id, row, col, direction)
+
+                    # if failed, try shifting the original cluster
+                    # in the opposite direction
+                    indices = saved_indices
+                    recur_shift_result = recur_shift_cluster(
+                        piece_cluster_id[piece_id],
+                        (direction + 2) % 4
+                    )
+
+                    if recur_shift_result == 0:
+                        return 0
+
+                    # attempts to insert the piece again
+                    # after the shift
+                    if direction == 0:
+                        return recur_insert_piece(piece_id, row + 1, col, 0)
+                    elif direction == 1:
+                        return recur_insert_piece(piece_id, row, col - 1, 1)
+                    elif direction == 2:
+                        return recur_insert_piece(piece_id, row - 1, col, 2)
+                    else:
+                        return recur_insert_piece(piece_id, row, col + 1, 3)
+
 
             # generating random orientation for each cluster
-            cluster_id_set = set(piece_cluster_id)
-            cluster_id_set.remove(0)
             cluster_to_orientation = {
                 cluster_id: np.random.randint(0, 4) for cluster_id in cluster_id_set
             }
@@ -414,16 +553,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
             # print('\nChild subjective match-orientation array:')
             # print(child_subjective_match_orientations)
 
-            # start combining clusters in a index matrix
-            indices = np.array([[
-                None for _ in range(n_segments)
-            ] for __ in range(n_segments)])
 
-            orientations = np.array([
-                None for _ in range(n_segments * n_segments)
-            ])
-
-            remain_piece_set = set([i for i in range(n_segments)])
 
 
 
@@ -461,7 +591,25 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         #print('\nPiece-wise cluster id array:')
         #print(piece_cluster_id)
 
+        # generating necessary data structures
+        cluster_id_set = set(piece_cluster_id)
+        cluster_id_set.remove(0)
+
+        cluster_to_piece_set = {}
+        for piece_id in range(n_segments * n_segments):
+            temp_cluster_id = piece_cluster_id[piece_id]
+            if temp_cluster_id != 0:
+                if temp_cluster_id not in cluster_to_piece_set:
+                    cluster_to_piece_set[temp_cluster_id] = {piece_id}
+                else:
+                    cluster_to_piece_set[temp_cluster_id].add(piece_id)
+
+        #print('Cluster to piece set:')
+        #print(cluster_to_piece_set)
+
+
         # generating a random solution while preserving good matches
+        combine_clusters()
 
     # generating stats for both parents
     parent1_piece_indices, parent1_orientations = parent1[1], parent1[2]
