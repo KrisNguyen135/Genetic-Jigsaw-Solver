@@ -26,9 +26,13 @@ def generate_child(child_objective_match_orientations):
         # solution in a direction
         # direction parameter is clockwise, starting from 0 -> up
         # returns None if shifted
-        # returns 0 if conflicting with bounds
+        # returns -1 if conflicting with bounds
         # NA: returns cluster id set if conflicting with other clusters
         def recur_shift_cluster(cluster_id, direction):
+            nonlocal indices
+
+            #print(f'Shifting cluster {cluster_id} in direction {direction}')
+
             # finding appropriate delta x and y
             row_change = 0
             col_change = 0
@@ -40,6 +44,7 @@ def generate_child(child_objective_match_orientations):
                 row_change += 1
             else:
                 col_change -= 1
+            #print(f'Direction deltas: {row_change}, {col_change}')
 
             # finding potential conflicts
             bound_conflict = False
@@ -62,7 +67,10 @@ def generate_child(child_objective_match_orientations):
                             bound_conflict = True
                             break
 
-                        elif indices[new_row, new_col] is not None:
+                        elif indices[new_row, new_col] is not None\
+                            and piece_cluster_id[indices[row, col]]\
+                                != piece_cluster_id[indices[new_row, new_col]]:
+
                             cluster_conflict = True
                             conflicting_cluster_id_set.add(
                                 piece_cluster_id[indices[new_row, new_col]]
@@ -70,29 +78,34 @@ def generate_child(child_objective_match_orientations):
 
             # handling potential conflicts
             if bound_conflict:
-                return 0
+                return -1
             if cluster_conflict:
-                #return conflicting_cluster_id_set
                 for conflicting_cluster_id in conflicting_cluster_id_set:
                     recur_shift_result = recur_shift_cluster(
                         conflicting_cluster_id, direction
                     )
-                    if recur_shift_result == 0:
-                        return 0
+                    if recur_shift_result == -1:
+                        return -1
 
             # if there is no conflict
             # shifting all targeted pieces
+            new_indices = np.copy(indices)
             for row in range(n_segments):
                 for col in range(n_segments):
                     if indices[row, col] in cluster_to_piece_set[cluster_id]:
                         new_row = row + row_change
                         new_col = col + col_change
+                        print(f'Shifting {indices[row, col]} from ({row}, {col}) to ({new_row}, {new_col})')
 
-                        indices[new_row, new_col] = indices[row, col]
-                        indices[row, col] = None
+                        new_indices[new_row, new_col] = indices[row, col]
+                        if new_indices[row, col] == indices[row, col]:
+                            new_indices[row, col] = None
+
+            indices = new_indices
 
         # returns None if successful
-        # returns 0 if the insertion is recursively impossible
+        # returns (row_change, col_change) if successful but shifted
+        # returns -1 if the insertion is recursively impossible
         def recur_insert_piece(piece_id, row, col, direction):
             nonlocal indices
 
@@ -102,45 +115,104 @@ def generate_child(child_objective_match_orientations):
             # if out of bound, shift the whole cluster
             # in opposite direction
             if row < 0 or row >= n_segments\
-                or col < 0 or col >= n_segments:
+                    or col < 0 or col >= n_segments:
 
                 recur_shift_result = recur_shift_cluster(
                     piece_cluster_id[piece_id],
                     (direction + 2) % 4
                 )
 
-                if recur_shift_result == 0:
-                    return 0
+                if recur_shift_result == -1:
+                    return -1
+
+                overall_row_change = 0
+                overall_col_change = 0
+                # adjusting the current location
+                if direction == 0:
+                    overall_row_change += 1
+                elif direction == 1:
+                    overall_col_change -= 1
+                elif direction == 2:
+                    overall_row_change -= 1
+                else:
+                    overall_col_change += 1
 
                 # attempts to insert the piece again
                 # after the shift
                 if direction == 0:
-                    return recur_insert_piece(piece_id, row + 1, col, 0)
+                    recur_insert_result = recur_insert_piece(
+                        piece_id, row + 1, col, 0
+                    )
                 elif direction == 1:
-                    return recur_insert_piece(piece_id, row, col - 1, 1)
+                    recur_insert_result = recur_insert_piece(
+                        piece_id, row, col - 1, 1
+                    )
                 elif direction == 2:
-                    return recur_insert_piece(piece_id, row - 1, col, 2)
+                    recur_insert_result = recur_insert_piece(
+                        piece_id, row - 1, col, 2
+                    )
                 else:
-                    return recur_insert_piece(piece_id, row, col + 1, 3)
+                    recur_insert_result = recur_insert_piece(
+                        piece_id, row, col + 1, 3
+                    )
+
+                if recur_insert_result == -1:
+                    return -1
+
+                '''print(f'{piece_id}, ({row}, {col}) returning:')
+                print(overall_row_change + recur_insert_result[0],
+                      overall_col_change + recur_insert_result[1])'''
+
+                return (overall_row_change + recur_insert_result[0],
+                        overall_col_change + recur_insert_result[1])
 
             # if the current cell is empty
             if indices[row, col] is None:
                 indices[row, col] = piece_id
-                remain_piece_set.remove(piece_id) # TODO: check if it has to be global
+                remain_piece_set.remove(piece_id)
 
+                overall_row_change = 0
+                overall_col_change = 0
                 for i in range(4):
+                    #print(f'Index of match-orientation: {i}')
                     match_orientation = child_subjective_match_orientations[piece_id][i]
 
                     if match_orientation is not None:
                         match_piece_id, _ = match_orientation
                         if i == 0:
-                            return recur_insert_piece(match_piece_id, row - 1, col, 0)
+                            recur_insert_result = recur_insert_piece(
+                                match_piece_id, row - 1, col, 0
+                            )
                         elif i == 1:
-                            return recur_insert_piece(match_piece_id, row, col + 1, 1)
+                            recur_insert_result = recur_insert_piece(
+                                match_piece_id, row, col + 1, 1
+                            )
                         elif i == 2:
-                            return recur_insert_piece(match_piece_id, row + 1, col, 2)
+                            recur_insert_result = recur_insert_piece(
+                                match_piece_id, row + 1, col, 2
+                            )
                         else:
-                            return recur_insert_piece(match_piece_id, row, col - 1, 3)
+                            recur_insert_result = recur_insert_piece(
+                                match_piece_id, row, col - 1, 3
+                            )
+
+                        if recur_insert_result == -1:
+                            return -1
+
+                        # adjusting the current location
+                        if recur_insert_result is not None:
+                            row_change, col_change = recur_insert_result
+
+                            overall_row_change += row_change
+                            overall_col_change += col_change
+
+                            row += row_change
+                            col += col_change
+
+                '''print(f'{piece_id}, ({row}, {col}) returning:')
+                print(overall_row_change, overall_col_change)'''
+
+                return overall_row_change, overall_col_change
 
             # if there is a conflict with another cluster
             else:
@@ -164,19 +236,46 @@ def generate_child(child_objective_match_orientations):
                     (direction + 2) % 4
                 )
 
-                if recur_shift_result == 0:
-                    return 0
+                if recur_shift_result == -1:
+                    return -1
+
+                overall_row_change = 0
+                overall_col_change = 0
+                # adjusting the current location
+                if direction == 0:
+                    overall_row_change += 1
+                elif direction == 1:
+                    overall_col_change -= 1
+                elif direction == 2:
+                    overall_row_change -= 1
+                else:
+                    overall_col_change += 1
 
                 # attempts to insert the piece again
                 # after the shift
                 if direction == 0:
-                    return recur_insert_piece(piece_id, row + 1, col, 0)
+                    recur_insert_result = recur_insert_piece(
+                        piece_id, row + 1, col, 0
+                    )
                 elif direction == 1:
-                    return recur_insert_piece(piece_id, row, col - 1, 1)
+                    recur_insert_result = recur_insert_piece(
+                        piece_id, row, col - 1, 1
+                    )
                 elif direction == 2:
-                    return recur_insert_piece(piece_id, row - 1, col, 2)
+                    recur_insert_result = recur_insert_piece(
+                        piece_id, row - 1, col, 2
+                    )
                 else:
-                    return recur_insert_piece(piece_id, row, col + 1, 3)
+                    recur_insert_result = recur_insert_piece(
+                        piece_id, row, col + 1, 3
+                    )
+
+                '''print(f'{piece_id}, ({row}, {col}) returning:')
+                print(overall_row_change + recur_insert_result[0],
+                      overall_col_change + recur_insert_result[1])'''
+
+                return (overall_row_change + recur_insert_result[0],
+                        overall_col_change + recur_insert_result[1])
 
         # generating random orientation for each cluster
         cluster_to_orientation = {
@@ -200,16 +299,38 @@ def generate_child(child_objective_match_orientations):
         print('\nChild subjective match-orientation array:')
         print(child_subjective_match_orientations)
 
+        # starting inserting pieces
         print('\nCurrent arrangement:')
         print(indices)
         print('\nRemaining pieces:')
         print(remain_piece_set)
-        # starting inserting pieces
-        recur_insert_piece(0, 2, 2, 0)
+        print(recur_insert_piece(0, 2, 1, 0))
+
+        print('\nCurrent arrangement:')
+        print(indices)
+        print('\nRemaining pieces:')
+        print(remain_piece_set)
+        print(recur_insert_piece(2, 1, 0, 0))
+
+        print('\nCurrent arrangement:')
+        print(indices)
+        print('\nRemaining pieces:')
+        print(remain_piece_set)
+        print(recur_insert_piece(4, 0, 1, 0))
+
         print('\nFinal arrangement:')
         print(indices)
         print('\nRemaining pieces:')
         print(remain_piece_set)
+
+        '''for piece_id in range(n_segments * n_segments):
+            print('\nCurrent arrangement:')
+            print(indices)
+            print('\nRemaining pieces:')
+            print(remain_piece_set)
+            print(f'Attempting to insert Piece {piece_id}')
+            print('Result:', recur_insert_piece(piece_id, ))'''
+
 
     # assigning matched pieces with the same cluster id
     piece_cluster_id = np.zeros(

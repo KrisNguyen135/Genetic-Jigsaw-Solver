@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="ee30eecc-a9fa-4bda-ab84-4bd996695f66" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/__pycache__/utils.cpython-37.pyc" beforeDir="false" afterPath="$PROJECT_DIR$/__pycache__/utils.cpython-37.pyc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/merge_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/merge_test.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,7 +13,7 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/GeneticJigsaw$test.coverage" NAME="test Coverage Results" MODIFIED="1547779881664" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/GeneticJigsaw$merge_test.coverage" NAME="merge_test Coverage Results" MODIFIED="1547781159589" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/GeneticJigsaw$merge_test.coverage" NAME="merge_test Coverage Results" MODIFIED="1547846745296" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FileEditorManager">
     <splitter split-orientation="vertical" split-proportion="0.83542037">
@@ -35,8 +34,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/merge_test.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="130">
-                  <caret line="22" column="72" selection-start-line="22" selection-start-column="72" selection-end-line="22" selection-end-column="72" />
+                <state relative-caret-position="141">
+                  <caret line="308" column="8" lean-forward="true" selection-start-line="308" selection-start-column="8" selection-end-line="308" selection-end-column="8" />
                 </state>
               </provider>
             </entry>
@@ -70,6 +69,7 @@
       <find>roll</find>
       <find>match_orientation</find>
       <find>remain</find>
+      <find>remai</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -205,12 +205,12 @@
       <workItem from="1547579321662" duration="3608000" />
       <workItem from="1547665109024" duration="5125000" />
       <workItem from="1547673379466" duration="7340000" />
-      <workItem from="1547779686942" duration="1461000" />
+      <workItem from="1547779686942" duration="7653000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="17595000" />
+    <option name="totallyTimeSpent" value="23787000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="801" extended-state="6" />
@@ -301,8 +301,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/merge_test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="130">
-          <caret line="22" column="72" selection-start-line="22" selection-start-column="72" selection-end-line="22" selection-end-column="72" />
+        <state relative-caret-position="141">
+          <caret line="308" column="8" lean-forward="true" selection-start-line="308" selection-start-column="8" selection-end-line="308" selection-end-column="8" />
         </state>
       </provider>
     </entry>
