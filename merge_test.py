@@ -1,4 +1,5 @@
 import numpy as np
+np.random.seed(13)
 
 n_segments = 3
 
@@ -19,7 +20,7 @@ def generate_child(child_objective_match_orientations):
             None for _ in range(n_segments * n_segments)
         ])
 
-        remain_piece_set = set([i for i in range(n_segments)])
+        remain_piece_set = set([i for i in range(n_segments * n_segments)])
 
         # tries to shift all pieces in a cluster in the current
         # solution in a direction
@@ -93,6 +94,8 @@ def generate_child(child_objective_match_orientations):
         # returns None if successful
         # returns 0 if the insertion is recursively impossible
         def recur_insert_piece(piece_id, row, col, direction):
+            nonlocal indices
+
             if piece_id not in remain_piece_set:
                 return
 
@@ -175,7 +178,6 @@ def generate_child(child_objective_match_orientations):
                 else:
                     return recur_insert_piece(piece_id, row, col + 1, 3)
 
-
         # generating random orientation for each cluster
         cluster_to_orientation = {
             cluster_id: np.random.randint(0, 4) for cluster_id in cluster_id_set
@@ -193,14 +195,21 @@ def generate_child(child_objective_match_orientations):
 
         child_subjective_match_orientations = np.array(child_subjective_match_orientations)
 
-        # print('\nCluster ID to orientation dictionary:')
-        # print(cluster_to_orientation)
-        # print('\nChild subjective match-orientation array:')
-        # print(child_subjective_match_orientations)
+        print('\nCluster ID to orientation dictionary:')
+        print(cluster_to_orientation)
+        print('\nChild subjective match-orientation array:')
+        print(child_subjective_match_orientations)
 
-
-
-
+        print('\nCurrent arrangement:')
+        print(indices)
+        print('\nRemaining pieces:')
+        print(remain_piece_set)
+        # starting inserting pieces
+        recur_insert_piece(0, 2, 2, 0)
+        print('\nFinal arrangement:')
+        print(indices)
+        print('\nRemaining pieces:')
+        print(remain_piece_set)
 
     # assigning matched pieces with the same cluster id
     piece_cluster_id = np.zeros(
@@ -233,8 +242,8 @@ def generate_child(child_objective_match_orientations):
                             piece_cluster_id[i]\
                                 = piece_cluster_id[piece_id]
 
-    #print('\nPiece-wise cluster id array:')
-    #print(piece_cluster_id)
+    print('\nPiece-wise cluster id array:')
+    print(piece_cluster_id)
 
     # generating necessary data structures
     cluster_id_set = set(piece_cluster_id)
@@ -249,12 +258,25 @@ def generate_child(child_objective_match_orientations):
             else:
                 cluster_to_piece_set[temp_cluster_id].add(piece_id)
 
-    #print('Cluster to piece set:')
-    #print(cluster_to_piece_set)
-
+    print('Cluster to piece set:')
+    print(cluster_to_piece_set)
 
     # generating a random solution while preserving good matches
     combine_clusters()
 
+
 if __name__ == '__main__':
-    child_objective_match_orientations =
+    # non-conflicting case
+    child_objective_match_orientations = np.array([
+        [None, (1, 0), (3, 1), None],
+        [None, None, None, (0, 0)],
+        [None, None, (5, 0), None],
+        [(0, 1), None, None, None],
+        [None, None, (7, 1), None],
+        [(2, 0), None, None, None],
+        [None, None, None, None],
+        [(4, 1), None, None, None],
+        [None, None, None, None]
+    ])
+
+    generate_child(child_objective_match_orientations)
