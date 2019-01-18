@@ -5,6 +5,7 @@ import numpy as np
 np.random.seed(13)
 #import skimage
 #import matplotlib.pyplot as plt
+import random
 
 
 # returns a 1d array of puzzle pieces

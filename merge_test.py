@@ -1,5 +1,6 @@
 import numpy as np
 np.random.seed(13)
+import random
 
 n_segments = 3
 
@@ -299,8 +300,8 @@ def generate_child(child_objective_match_orientations):
         print('\nChild subjective match-orientation array:')
         print(child_subjective_match_orientations)
 
-        # starting inserting pieces
-        print('\nCurrent arrangement:')
+        # custom way to insert pieces
+        '''print('\nCurrent arrangement:')
         print(indices)
         print('\nRemaining pieces:')
         print(remain_piece_set)
@@ -321,15 +322,52 @@ def generate_child(child_objective_match_orientations):
         print('\nFinal arrangement:')
         print(indices)
         print('\nRemaining pieces:')
-        print(remain_piece_set)
+        print(remain_piece_set)'''
 
-        '''for piece_id in range(n_segments * n_segments):
-            print('\nCurrent arrangement:')
+        # start inserting pieces in order of cluster
+        # TODO: create random orientations for pieces
+        # TODO: that are not in a cluster
+        for piece_id in range(n_segments * n_segments):
+            '''print('\nCurrent arrangement:')
             print(indices)
             print('\nRemaining pieces:')
-            print(remain_piece_set)
-            print(f'Attempting to insert Piece {piece_id}')
-            print('Result:', recur_insert_piece(piece_id, ))'''
+            print(remain_piece_set)'''
+
+            remain_locations = set(
+                map(tuple, np.argwhere(indices == None))
+            )
+
+            recur_insert_result = -1
+            saved_indices = indices
+            saved_remain_piece_set = remain_piece_set
+
+            while remain_locations and recur_insert_result == -1:
+                print('\nCurrent arrangement:')
+                print(indices)
+                print('\nRemaining pieces:')
+                print(remain_piece_set)
+
+                print('\nRemaining locations:')
+                print(remain_locations)
+                location = random.sample(remain_locations, 1)[0]
+                remain_locations.remove(location)
+                row, col = location
+
+                indices = np.copy(saved_indices)
+                remain_piece_set = saved_remain_piece_set.copy()
+
+                print(f'\nAttempting to insert Piece {piece_id} in ({row}, {col})')
+                recur_insert_result = recur_insert_piece(piece_id, row, col, 0)
+                print('Result:', recur_insert_result)
+
+            #if recur_insert_result == -1:
+
+
+
+        print('\nFinal arrangement:')
+        print(indices)
+        print('\nRemaining pieces:')
+        print(remain_piece_set)
 
 
     # assigning matched pieces with the same cluster id
