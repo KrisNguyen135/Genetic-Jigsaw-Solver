@@ -86,4 +86,11 @@ if __name__ == '__main__':
         [3, 7, 4]
     ]), np.array([0, 3, 2, 0, 0, 1, 2, 2, 0]))'''
 
+    # large cluster case
+    parent2 = (None, np.array([
+        [2, 7, 4],
+        [6, 8, 5],
+        [3, 1, 0]
+    ]), np.array([0, 0, 2, 3, 1, 1, 0, 1, 1]))
+
     generate_offspring(parent1, parent2, 2, N_SEGMENTS)

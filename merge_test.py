@@ -1,6 +1,6 @@
 import random
 import numpy as np
-np.random.seed(0)
+np.random.seed(4)
 
 n_segments = 3
 
@@ -291,12 +291,12 @@ def generate_child(child_objective_match_orientations):
 
         child_subjective_match_orientations = np.array(child_subjective_match_orientations)
 
-        print('\nCluster ID to orientation dictionary:')
+        '''print('\nCluster ID to orientation dictionary:')
         print(cluster_to_orientation)
         print('\nPiece to orientation:')
         print(piece_orientation)
         print('\nChild subjective match-orientation array:')
-        print(child_subjective_match_orientations)
+        print(child_subjective_match_orientations)'''
 
         # custom way to insert pieces
         # for testing
@@ -325,40 +325,57 @@ def generate_child(child_objective_match_orientations):
 
         # start inserting pieces in order of cluster
         for piece_id in range(n_segments * n_segments):
-            remain_locations = set(
-                map(tuple, np.argwhere(indices == None))
-            )
+            if piece_cluster_id[piece_id] != 0:
+                remain_locations = set(
+                    map(tuple, np.argwhere(indices == None))
+                )
 
-            recur_insert_result = -1
-            saved_indices = indices
-            saved_remain_piece_set = remain_piece_set
+                recur_insert_result = -1
+                saved_indices = indices
+                saved_remain_piece_set = remain_piece_set
 
-            while remain_locations and recur_insert_result == -1:
-                print('\nCurrent arrangement:')
-                print(indices)
-                print('\nRemaining pieces:')
-                print(remain_piece_set)
+                while remain_locations and recur_insert_result == -1:
+                    '''print('\nCurrent arrangement:')
+                    print(indices)
+                    print('\nRemaining pieces:')
+                    print(remain_piece_set)
+                    print('\nRemaining locations:')
+                    print(remain_locations)'''
 
-                print('\nRemaining locations:')
-                print(remain_locations)
+                    location = random.sample(remain_locations, 1)[0]
+                    remain_locations.remove(location)
+                    row, col = location
+
+                    indices = np.copy(saved_indices)
+                    remain_piece_set = saved_remain_piece_set.copy()
+
+                    #print(f'\nAttempting to insert Piece {piece_id} in ({row}, {col})')
+                    recur_insert_result = recur_insert_piece(piece_id, row, col, 0)
+                    #print('Result:', recur_insert_result)
+
+                if recur_insert_result == -1:
+                    return -1
+
+        # inserting the rest of the pieces
+        # (pieces w/o any matches)
+        for piece_id in range(n_segments * n_segments):
+            if piece_cluster_id[piece_id] == 0:
+                remain_locations = set(
+                    map(tuple, np.argwhere(indices == None))
+                )
+
                 location = random.sample(remain_locations, 1)[0]
                 remain_locations.remove(location)
                 row, col = location
 
-                indices = np.copy(saved_indices)
-                remain_piece_set = saved_remain_piece_set.copy()
+                recur_insert_piece(piece_id, row, col, 0)
 
-                print(f'\nAttempting to insert Piece {piece_id} in ({row}, {col})')
-                recur_insert_result = recur_insert_piece(piece_id, row, col, 0)
-                print('Result:', recur_insert_result)
-
-            if recur_insert_result == -1:
-                return -1
-
-        print('\nFinal arrangement:')
+        '''print('\nFinal arrangement:')
         print(indices)
         print('\nRemaining pieces:')
-        print(remain_piece_set)
+        print(remain_piece_set)'''
+
+        return indices, piece_orientation
 
 
     # assigning matched pieces with the same cluster id
@@ -412,7 +429,7 @@ def generate_child(child_objective_match_orientations):
     print(cluster_to_piece_set)
 
     # generating a random solution while preserving good matches
-    combine_clusters()
+    return combine_clusters()
 
 
 if __name__ == '__main__':
@@ -429,4 +446,20 @@ if __name__ == '__main__':
         [None, None, None, None]
     ])
 
-    generate_child(child_objective_match_orientations)
+    # large cluster case
+    '''child_objective_match_orientations = np.array([
+        [None, (1, 0), (3, 1), None],
+        [None, None, None, (0, 0)],
+        [None, None, None, None],
+        [(0, 1), None, None, None],
+        [None, (5, 0), (7, 1), None],
+        [None, None, (8, 0), (4, 0)],
+        [None, None, None, None],
+        [(4, 1), (8, 0.5), None, None],
+        [(5, 0), None, None, (7, 0.5)]
+    ])'''
+
+    indices, orientations = generate_child(child_objective_match_orientations)
+
+    print(indices)
+    print(orientations)
