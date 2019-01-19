@@ -1,6 +1,6 @@
-import numpy as np
-np.random.seed(13)
 import random
+import numpy as np
+np.random.seed(0)
 
 n_segments = 3
 
@@ -11,15 +11,10 @@ n_segments = 3
 def generate_child(child_objective_match_orientations):
 
     def combine_clusters():
-
-        # global variables for the solution
+        # nonlocal variables for the solution
         indices = np.array([[
             None for _ in range(n_segments)
         ] for __ in range(n_segments)])
-
-        orientations = np.array([
-            None for _ in range(n_segments * n_segments)
-        ])
 
         remain_piece_set = set([i for i in range(n_segments * n_segments)])
 
@@ -282,25 +277,29 @@ def generate_child(child_objective_match_orientations):
         cluster_to_orientation = {
             cluster_id: np.random.randint(0, 4) for cluster_id in cluster_id_set
         }
+        piece_orientation = np.array([
+            cluster_to_orientation[piece_cluster_id[piece_id]] if piece_cluster_id[piece_id] != 0\
+                else np.random.randint(0, 4) for piece_id in range(n_segments * n_segments)
+        ])
 
         # creating the subjective match-orientation array
         child_subjective_match_orientations = []
         for i, match_orientation in enumerate(child_objective_match_orientations):
-            if piece_cluster_id[i] != 0:
-                child_subjective_match_orientations.append(np.roll(
-                    match_orientation, cluster_to_orientation[piece_cluster_id[i]]
-                ))
-            else:
-                child_subjective_match_orientations.append(match_orientation)
+            child_subjective_match_orientations.append(np.roll(
+                match_orientation, piece_orientation[i]
+            ))
 
         child_subjective_match_orientations = np.array(child_subjective_match_orientations)
 
         print('\nCluster ID to orientation dictionary:')
         print(cluster_to_orientation)
+        print('\nPiece to orientation:')
+        print(piece_orientation)
         print('\nChild subjective match-orientation array:')
         print(child_subjective_match_orientations)
 
         # custom way to insert pieces
+        # for testing
         '''print('\nCurrent arrangement:')
         print(indices)
         print('\nRemaining pieces:')
@@ -325,14 +324,7 @@ def generate_child(child_objective_match_orientations):
         print(remain_piece_set)'''
 
         # start inserting pieces in order of cluster
-        # TODO: create random orientations for pieces
-        # TODO: that are not in a cluster
         for piece_id in range(n_segments * n_segments):
-            '''print('\nCurrent arrangement:')
-            print(indices)
-            print('\nRemaining pieces:')
-            print(remain_piece_set)'''
-
             remain_locations = set(
                 map(tuple, np.argwhere(indices == None))
             )
@@ -360,9 +352,8 @@ def generate_child(child_objective_match_orientations):
                 recur_insert_result = recur_insert_piece(piece_id, row, col, 0)
                 print('Result:', recur_insert_result)
 
-            #if recur_insert_result == -1:
-
-
+            if recur_insert_result == -1:
+                return -1
 
         print('\nFinal arrangement:')
         print(indices)
