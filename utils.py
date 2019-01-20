@@ -52,7 +52,7 @@ def generate_init_pop(piece_edges, n_segments, pop_size=100):
         shuffled_indices = np.random.permutation(indices)
 
         individual = []
-        rotations = [] # 0: not rotated, 1: 90-degree clock-wise, etc.
+        rotations = []  # 0: not rotated, 1: 90-degree clock-wise, etc.
         for index in shuffled_indices:
             rotation = np.random.randint(0, 4)
             rotations.append(rotation)
@@ -66,7 +66,6 @@ def generate_init_pop(piece_edges, n_segments, pop_size=100):
         shuffled_indices = shuffled_indices.reshape((n_segments, n_segments))
         individual = np.array(individual).reshape(
             (n_segments, n_segments, 4, -1))
-        #rotations = np.array(rotations).reshape((n_segments, n_segments))
 
         pop.append((individual, shuffled_indices, rotations))
 
@@ -95,7 +94,7 @@ def get_fitness(ind, n_segments):
             horizontal_fitness_matrix[j, i] = get_difference(
                 piece_edges[j, i][1], piece_edges[j, i + 1][3])
 
-    return (horizontal_fitness_matrix, vertical_fitness_matrix)
+    return horizontal_fitness_matrix, vertical_fitness_matrix
 
 
 # drawing the pieces in the order and rotation specified in an individual
@@ -114,7 +113,7 @@ def visualize(pieces, ind, n_segments):
                 skimage.transform.rotate(
                     pieces[piece_indices[i, j]],
                     90 * rotations[piece_indices[i, j]]),
-                cmap = 'gray')
+                cmap='gray')
             ax[i, j].set_xticklabels([])
             ax[i, j].set_yticklabels([])
 
@@ -176,9 +175,9 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
 
     # initializing the match-orientation array
     piece_indices = ind[1]
-    match_orientations = np.array([np.array([None for i in range(4)])
-        for j in range(piece_indices.size)])
-
+    match_orientations = np.array([
+        np.array([None for _ in range(4)]) for __ in range(piece_indices.size)
+    ])
 
     # initializing cluster id
     cluster_id_set = set()
@@ -244,7 +243,6 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
                     piece_indices[i, j], fitness_matrix_pair[1][i, j]
                 )
 
-
     # calculating fitness of each cluster
     # and generating the cluster id - piece set dictionary
     cluster_fitnesses = {}
@@ -270,9 +268,8 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
         else:
             cluster_fitnesses[id] = fitness_sum / fitness_count
 
-
     return (cluster_matrix, cluster_id_set, cluster_fitnesses,
-        cluster_to_piece_set, match_orientations)
+            cluster_to_piece_set, match_orientations)
 
 
 # TODO: test
@@ -337,7 +334,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
                 # in the same direction
                 if parent1_objective_orientation[i] is not None and\
                     parent2_objective_orientation[i] is not None and\
-                    parent1_objective_orientation[i] != parent2_objective_orientation[i]:
+                        parent1_objective_orientation[i] != parent2_objective_orientation[i]:
 
                     return True
 
@@ -445,6 +442,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
                         if indices[row, col] in cluster_to_piece_set[cluster_id]:
                             new_row = row + row_change
                             new_col = col + col_change
+
                             #print(f'Shifting {indices[row, col]} from ({row}, {col}) to ({new_row}, {new_col})')
 
                             new_indices[new_row, new_col] = indices[row, col]
@@ -632,8 +630,8 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
                 cluster_id: np.random.randint(0, 4) for cluster_id in cluster_id_set
             }
             piece_orientation = np.array([
-                cluster_to_orientation[piece_cluster_id[piece_id]] if piece_cluster_id[piece_id] != 0 \
-                    else np.random.randint(0, 4) for piece_id in range(n_segments * n_segments)
+                cluster_to_orientation[piece_cluster_id[piece_id]] if piece_cluster_id[piece_id] != 0
+                else np.random.randint(0, 4) for piece_id in range(n_segments * n_segments)
             ])
 
             # creating the subjective match-orientation array
@@ -794,7 +792,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     ]), np.array([
         [10, 10, 0],
         [10, 10, 10]
-    ])) # used for testing
+    ]))  # used for testing
 
     parent1_cluster_matrix, parent1_cluster_id_set, parent1_cluster_fitnesses,\
         parent1_cluster_to_piece_set, parent1_match_orientations\
@@ -814,7 +812,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         [10, 10, 10],
         [1, 10, 10] # non-conflicting and mergeable cases
         #[1.6, 10, 10] # conflicting case
-    ])) # used for testing'''
+    ]))  # used for testing'''
 
     # large cluster case
     parent2_test_fitness_matrix_pair = (np.array([
@@ -824,7 +822,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     ]), np.array([
         [10, 0.5, 0],
         [10, 10, 10]
-    ])) # used for testing
+    ]))  # used for testing
 
     parent2_cluster_matrix, parent2_cluster_id_set, parent2_cluster_fitnesses,\
         parent2_cluster_to_piece_set, parent2_match_orientations\
@@ -834,7 +832,6 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         )
 
     print_parents_info()
-
 
     conflicted_clusters = []
 
@@ -846,17 +843,10 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
             intersect = parent1_cluster_to_piece_set[parent1_cluster_id].intersection(
                 parent2_cluster_to_piece_set[parent2_cluster_id])
 
-            if intersect:
-                if conflict_check(intersect):
-                    conflicted_clusters.append(
-                        (parent1_cluster_id, parent2_cluster_id)
-                    )
-                '''else:
-                    #mergeable_clusters[(parent1_cluster_id, parent2_cluster_id)]\
-                    #    = intersect
-                    mergeable_clusters.append(
-                        (parent1_cluster_id, parent2_cluster_id)
-                    )'''
+            if intersect and conflict_check(intersect):
+                conflicted_clusters.append(
+                    (parent1_cluster_id, parent2_cluster_id)
+                )
 
     #print('Mergeable clusters:')
     #print(mergeable_clusters)
@@ -864,13 +854,12 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     print(conflicted_clusters)
     print('-' * 50)
 
-
     # keeping track of bad clusters and remove them from ind stats of both parents
     parent1_clusters_to_remove = set()
     parent2_clusters_to_remove = set()
     for parent1_cluster_id, parent2_cluster_id in conflicted_clusters:
         if parent1_cluster_fitnesses[parent1_cluster_id]\
-            < parent2_cluster_fitnesses[parent2_cluster_id]:
+                < parent2_cluster_fitnesses[parent2_cluster_id]:
 
             parent2_clusters_to_remove.add(parent2_cluster_id)
         else:
@@ -934,3 +923,5 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     print(indices)
     print('Generated child orientations:')
     print(orientations)
+
+    return indices, orientations
