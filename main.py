@@ -14,26 +14,21 @@ if __name__ == '__main__':
     # to be uncommented when testing unshuffled image
     #pieces = generate_puzzle(img, n_segments=N_SEGMENTS, shuffle=False)
 
-
     '''print('Individual pieces:')
     for piece in pieces:
         print(piece)
     print(pieces.shape)
     print('*' * 50)'''
 
-
     threshold = generate_threshold(pieces)
     print('Threshold:', threshold)
 
-
     # generating the piece edges, clock-wise
-    piece_edges =  np.array([np.array([
+    piece_edges = np.array([np.array([
         piece[0, :],
         piece[:, -1],
-        #np.flip(piece[-1, :]),
-        piece[-1, :], # easier to calculate differences
-        #np.flip(piece[:, 0])
-        piece[:, 0] # easier to calculate differences
+        piece[-1, :],
+        piece[:, 0]
     ]) for piece in pieces])
 
     '''print('Piece edges:')
@@ -41,7 +36,6 @@ if __name__ == '__main__':
         print(piece)
     print(piece_edges.shape)
     print('*' * 50)'''
-
 
     # testing unshuffled image
     # switch the code that generates the puzzle when uncomment this part
@@ -54,7 +48,6 @@ if __name__ == '__main__':
     print('Fitness:', get_fitness(ind, N_SEGMENTS))
     visualize(pieces, ind, N_SEGMENTS)'''
 
-
     # generating the initial random population
     #init_pop = generate_init_pop(piece_edges, N_SEGMENTS, pop_size=6000)
 
@@ -66,7 +59,6 @@ if __name__ == '__main__':
     print(individual[2])
     print('Fitness:', get_fitness(individual, N_SEGMENTS))
     visualize(pieces, individual, N_SEGMENTS)'''
-
 
     # experimenting with good individuals
     '''fitness_matrix_pairs = np.array([

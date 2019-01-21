@@ -50,7 +50,6 @@ if __name__ == '__main__':
     print(match_orientations)
     print()'''
 
-
     # testing generate_offspring() function
     parent1 = (None, np.array([
         [4, 3, 0],

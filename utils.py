@@ -43,7 +43,7 @@ def generate_puzzle(img, n_segments=5, shuffle=True):
 # - indices of the pieces in matrix format
 # - rotation of the pieces in an ordered 1d-array
 def generate_init_pop(piece_edges, n_segments, pop_size=100):
-    # indices to keep track of in each individual
+    # indices to keep track of each individual
     indices = np.arange(len(piece_edges))
 
     pop = []
@@ -72,6 +72,39 @@ def generate_init_pop(piece_edges, n_segments, pop_size=100):
     return pop
 
 
+# TODO: test to see if the same results as v1 can be produced (in main)
+# returns a random initial population
+# each individual contains a tuple of:
+# - indices of the pieces in matrix format
+# - orientations of the pieces in an ordered 1d-array
+def generate_init_pop_v2(n_segments, pop_size=100):
+    # indices to keep track of each individual
+    indices = np.arange(n_segments * n_segments)
+
+    pop = []
+    for i in range(pop_size):
+        # shuffling the indices
+        shuffled_indices = np.random.permutation(indices)
+
+        orientations = []  # 0: not rotated, 1: 90-degree clock-wise, etc.
+        for index in shuffled_indices:
+            orientation = np.random.randint(0, 4)
+            orientations.append(orientation)
+
+        # creating the orientation array
+        sorted_orientation_indices = shuffled_indices.argsort()
+        orientations = np.array(
+            orientations
+        ).flatten()[sorted_orientation_indices]
+
+        # reshaping the indices
+        shuffled_indices = shuffled_indices.reshape((n_segments, n_segments))
+
+        pop.append((shuffled_indices, orientations))
+
+    return pop
+
+
 # returns two 2d arrays (matrices) holding differences between adjacent pieces
 # in an individual in a given population
 # the first matrix has `n_segments` rows and `n_segments - 1` columns, holding
@@ -93,6 +126,34 @@ def get_fitness(ind, n_segments):
                 piece_edges[i, j][2], piece_edges[i + 1, j][0])
             horizontal_fitness_matrix[j, i] = get_difference(
                 piece_edges[j, i][1], piece_edges[j, i + 1][3])
+
+    return horizontal_fitness_matrix, vertical_fitness_matrix
+
+
+# TODO: test to see if the same results as v1 can be produced (in main)
+# returns two 2d-arrays (matrices) holding differences between adjacent pieces
+# in an individual in a given population
+# first matrix has `n_segments` rows and `n_segments - 1` columns, holding
+# differences between horizontally adjacent pieces
+def get_fitness_v2(piece_edges, ind, n_segments):
+    # simple squares of differences
+    def get_difference(edge1, edge2):
+        return np.sum((edge1 - edge2) ** 2)
+
+    ind_piece_edges = []
+    for piece_id, orientation in zip(ind[0], ind[1]):
+        ind_piece_edges.append(
+            np.roll(piece_edges[piece_id], orientation, axis=0))
+
+    horizontal_fitness_matrix = np.zeros((n_segments, n_segments - 1))
+    vertical_fitness_matrix = np.zeros((n_segments - 1, n_segments))
+
+    for i in range(n_segments - 1):
+        for j in range(n_segments):
+            vertical_fitness_matrix[i, j] = get_difference(
+                ind_piece_edges[i, j][2], ind_piece_edges[i + 1, j][0])
+            horizontal_fitness_matrix[j, i] = get_difference(
+                ind_piece_edges[j, i][1], ind_piece_edges[j, i + 1][3])
 
     return horizontal_fitness_matrix, vertical_fitness_matrix
 
@@ -272,7 +333,9 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
             cluster_to_piece_set, match_orientations)
 
 
-# TODO: test
+# returns a randomly generated child that preserves all good
+# matches from each parent and attempts to merge any mergeable
+# clusters
 def generate_offspring(parent1, parent2, threshold, n_segments):
 
     def print_parents_info():
