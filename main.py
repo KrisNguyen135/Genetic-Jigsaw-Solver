@@ -5,21 +5,15 @@ from utils import *
 
 N_SEGMENTS = 3
 
+
 if __name__ == '__main__':
     # reading in an image
     img = skimage.io.imread('pictures/michelangelo-creation-of-adam.jpg')
 
     # generating the puzzle pieces
     pieces = generate_puzzle(img, n_segments=N_SEGMENTS)
-    # to be uncommented when testing unshuffled image
-    #pieces = generate_puzzle(img, n_segments=N_SEGMENTS, shuffle=False)
 
-    '''print('Individual pieces:')
-    for piece in pieces:
-        print(piece)
-    print(pieces.shape)
-    print('*' * 50)'''
-
+    #threshold = generate_threshold(pieces, iqr=True, r=3)
     threshold = generate_threshold(pieces)
     print('Threshold:', threshold)
 
@@ -30,23 +24,6 @@ if __name__ == '__main__':
         piece[-1, :],
         piece[:, 0]
     ]) for piece in pieces])
-
-    '''print('Piece edges:')
-    for piece in piece_edges:
-        print(piece)
-    print(piece_edges.shape)
-    print('*' * 50)'''
-
-    # testing unshuffled image
-    # switch the code that generates the puzzle when uncomment this part
-    '''ind = (
-        piece_edges.reshape((N_SEGMENTS, N_SEGMENTS, 4, -1)),
-        np.arange(N_SEGMENTS ** 2).reshape((N_SEGMENTS, N_SEGMENTS)),
-        np.zeros((N_SEGMENTS * N_SEGMENTS,), dtype=int)
-    )
-
-    print('Fitness:', get_fitness(ind, N_SEGMENTS))
-    visualize(pieces, ind, N_SEGMENTS)'''
 
     # generating the initial random population
     #init_pop = generate_init_pop(piece_edges, N_SEGMENTS, pop_size=6000)
@@ -86,3 +63,35 @@ if __name__ == '__main__':
     print('Second best fitness:', fitnesses[second_best_fitness_index])
 
     visualize(pieces, second_best_ind, N_SEGMENTS)'''
+
+    # generating a starting population
+    old_pop = generate_init_pop_v2(N_SEGMENTS)
+
+    filtered_pop = filter_pop(piece_edges, old_pop, threshold, N_SEGMENTS)
+    print(f'Population filtered down to {len(filtered_pop)} individuals.')
+
+    '''print('======Testing first individual======')
+    parent1 = filtered_pop[-1]
+    print(parent1[0])
+    print(parent1[1])
+    print('Number of good matches:')
+    print(get_fitness_v2(
+        piece_edges, parent1, N_SEGMENTS, threshold=threshold))
+    parent1_fitness_matrix_pair = get_fitness_v2(
+        piece_edges, parent1, N_SEGMENTS)
+    print(parent1_fitness_matrix_pair[0])
+    print(parent1_fitness_matrix_pair[1])
+    visualize_v2(pieces, parent1, N_SEGMENTS)
+
+    print('======Testing second individual======')
+    parent2 = filtered_pop[-2]
+    print(parent2[0])
+    print(parent2[1])
+    print('Number of good matches:')
+    print(get_fitness_v2(
+        piece_edges, parent2, N_SEGMENTS, threshold=threshold))
+    parent2_fitness_matrix_pair = get_fitness_v2(
+        piece_edges, parent2, N_SEGMENTS)
+    print(parent2_fitness_matrix_pair[0])
+    print(parent2_fitness_matrix_pair[1])
+    visualize_v2(pieces, parent2, N_SEGMENTS)'''

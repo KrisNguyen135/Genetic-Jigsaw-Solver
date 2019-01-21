@@ -133,7 +133,9 @@ def get_fitness(ind, n_segments):
 # in an individual in a given population
 # first matrix has `n_segments` rows and `n_segments - 1` columns, holding
 # differences between horizontally adjacent pieces
-def get_fitness_v2(piece_edges, ind, n_segments):
+# specify a threshold to have the function return the number of good matches
+# (edge-wise), whose differences are less than or equal to the threshold
+def get_fitness_v2(piece_edges, ind, n_segments, threshold=None):
     # simple squares of differences
     def get_difference(edge1, edge2):
         return np.sum((edge1 - edge2) ** 2)
@@ -151,8 +153,8 @@ def get_fitness_v2(piece_edges, ind, n_segments):
     ind_piece_edges = np.array(ind_piece_edges).reshape(
         (n_segments, n_segments, 4, -1))
 
-    print('Version 2 piece-edge array:')
-    print(ind_piece_edges)
+    #print('Version 2 piece-edge array:')
+    #print(ind_piece_edges)
 
     horizontal_fitness_matrix = np.zeros((n_segments, n_segments - 1))
     vertical_fitness_matrix = np.zeros((n_segments - 1, n_segments))
@@ -163,6 +165,10 @@ def get_fitness_v2(piece_edges, ind, n_segments):
                 ind_piece_edges[i, j][2], ind_piece_edges[i + 1, j][0])
             horizontal_fitness_matrix[j, i] = get_difference(
                 ind_piece_edges[j, i][1], ind_piece_edges[j, i + 1][3])
+
+    if threshold is not None:
+        return (horizontal_fitness_matrix <= threshold).sum()\
+               + (vertical_fitness_matrix <= threshold).sum()
 
     return horizontal_fitness_matrix, vertical_fitness_matrix
 
@@ -219,7 +225,9 @@ def visualize_v2(pieces, ind, n_segments):
 # calculates all differences between first and seconds layers of each piece
 # returns the percentile threshold of the calculated differences
 # used to define potential matches between pairs of pieces
-def generate_threshold(pieces, p=100):
+# if `iqr` is True, returns the cutoff point for outlier calculation
+# (q25 - r * iqr, q75 + r * iqr)
+def generate_threshold(pieces, p=100, iqr=False, r=1.5):
     differences = []
     for piece in pieces:
         differences.append(
@@ -231,7 +239,10 @@ def generate_threshold(pieces, p=100):
         differences.append(
             np.sum((piece[:, 0] - piece[:, 1]) ** 2))
 
-    #differences = np.array(differences)
+    if iqr:
+        q75, q25 = np.percentile(differences, [75, 25])
+        iqrange = q75 - q25
+        return q75 + r * iqrange
 
     return np.percentile(differences, p)
 
@@ -257,10 +268,11 @@ def change_cluster_id(cluster_matrix, target_id, result_id):
 # 1st element --> match at top, 2nd element --> match on right, etc.
 # the orientations are individually-specific and don't correspond to the
 # original orientations
-def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
+def get_ind_stats(piece_edges, ind, threshold, n_segments, fitness_matrix_pair=None):
     # obtaining the fitness matrix
     if fitness_matrix_pair is None:
-        fitness_matrix_pair = get_fitness(ind, n_segments)
+        #fitness_matrix_pair = get_fitness(ind, n_segments)
+        fitness_matrix_pair = get_fitness_v2(piece_edges, ind, n_segments)
 
     # initializing the cluster matrix
     good_match_horizontal_matrix = fitness_matrix_pair[0] <= threshold
@@ -370,46 +382,7 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
 # returns a randomly generated child that preserves all good
 # matches from each parent and attempts to merge any mergeable
 # clusters
-def generate_offspring(parent1, parent2, threshold, n_segments):
-
-    def print_parents_info():
-        print('Parent1 piece indices:')
-        print(parent1_piece_indices)
-        print('Parent1 orientations:')
-        print(parent1_orientations)
-        print('Parent1 fitness matrix pair:')
-        print(parent1_test_fitness_matrix_pair[0])
-        print(parent1_test_fitness_matrix_pair[1])
-        print('Parent1 cluster matrix:')
-        print(parent1_cluster_matrix)
-        print('Parent1 cluster id set:')
-        print(parent1_cluster_id_set)
-        print('Parent1 cluster fitnesses:')
-        print(parent1_cluster_fitnesses)
-        print('Parent1 cluster to piece:')
-        print(parent1_cluster_to_piece_set)
-        print('Parent1 match-orientation array:')
-        print(parent1_match_orientations)
-        print('-' * 50)
-
-        print('Parent2 piece indices:')
-        print(parent2_piece_indices)
-        print('Parent2 orientations:')
-        print(parent2_orientations)
-        print('Parent2 fitness matrix pair:')
-        print(parent2_test_fitness_matrix_pair[0])
-        print(parent2_test_fitness_matrix_pair[1])
-        print('Parent2 cluster matrix:')
-        print(parent2_cluster_matrix)
-        print('Parent2 cluster id set:')
-        print(parent2_cluster_id_set)
-        print('Parent2 cluster fitnesses:')
-        print(parent2_cluster_fitnesses)
-        print('Parent2 cluster to piece:')
-        print(parent2_cluster_to_piece_set)
-        print('Parent2 match-orientation array:')
-        print(parent2_match_orientations)
-        print('-' * 50)
+def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments):
 
     # precondition: intersection is not empty
     # returns True if there is a real conflict
@@ -860,25 +833,25 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     # generating stats for both parents
     parent1_piece_indices, parent1_orientations = parent1
 
-    parent1_test_fitness_matrix_pair = (np.array([
+    '''parent1_test_fitness_matrix_pair = (np.array([
         [10, 1],
         [10, 10],
         [10, 10]
     ]), np.array([
         [10, 10, 0],
         [10, 10, 10]
-    ]))  # used for testing
+    ]))  # used for testing'''
 
     parent1_cluster_matrix, parent1_cluster_id_set, parent1_cluster_fitnesses,\
         parent1_cluster_to_piece_set, parent1_match_orientations\
         = get_ind_stats(
-            parent1, threshold, n_segments,
-            fitness_matrix_pair=parent1_test_fitness_matrix_pair
+            piece_edges, parent1, threshold, n_segments#,
+            #fitness_matrix_pair=parent1_test_fitness_matrix_pair
         )
 
     parent2_piece_indices, parent2_orientations = parent2
 
-    parent2_test_fitness_matrix_pair = (np.array([
+    '''parent2_test_fitness_matrix_pair = (np.array([
         [10, 10],
         [10, 0], # non-conflicting case
         #[10, 10], # mergeable and conflicting cases
@@ -887,7 +860,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         [10, 10, 10],
         [1, 10, 10] # non-conflicting and mergeable cases
         #[1.6, 10, 10] # conflicting case
-    ]))  # used for testing
+    ]))  # used for testing'''
 
     # large cluster case 1
     '''parent2_test_fitness_matrix_pair = (np.array([
@@ -912,11 +885,9 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     parent2_cluster_matrix, parent2_cluster_id_set, parent2_cluster_fitnesses,\
         parent2_cluster_to_piece_set, parent2_match_orientations\
         = get_ind_stats(
-            parent2, threshold, n_segments,
-            fitness_matrix_pair=parent2_test_fitness_matrix_pair
+            piece_edges, parent2, threshold, n_segments#,
+            #fitness_matrix_pair=parent2_test_fitness_matrix_pair
         )
-
-    print_parents_info()
 
     conflicted_clusters = []
 
@@ -933,12 +904,6 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
                     (parent1_cluster_id, parent2_cluster_id)
                 )
 
-    #print('Mergeable clusters:')
-    #print(mergeable_clusters)
-    print('Conflicted clusters:')
-    print(conflicted_clusters)
-    print('-' * 50)
-
     # keeping track of bad clusters and remove them from ind stats of both parents
     parent1_clusters_to_remove = set()
     parent2_clusters_to_remove = set()
@@ -949,11 +914,6 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
             parent2_clusters_to_remove.add(parent2_cluster_id)
         else:
             parent1_clusters_to_remove.add(parent1_cluster_id)
-
-    print('Parent1 clusters to remove:')
-    print(parent1_clusters_to_remove)
-    print('Parent2 clusters to remove:')
-    print(parent2_clusters_to_remove)
 
     for cluster_id in parent1_clusters_to_remove:
         remove_cluster(
@@ -967,9 +927,6 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
             parent2_cluster_id_set, parent2_cluster_fitnesses,
             parent2_cluster_to_piece_set, parent2_match_orientations
         )
-
-    print('======After removing bad clusters======')
-    print_parents_info()
 
     # transferring match-orientation arrays from parents to child
     child_objective_match_orientations = np.array(
@@ -1017,3 +974,23 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     return indices, orientations'''
 
     return child_result
+
+
+# omit bad individuals from a population
+# `r` specifies how large the kept portion
+# of the population is
+def filter_pop(piece_edges, pop, threshold, n_segments, r=0.5):
+    fitnesses = [get_fitness_v2(
+        piece_edges, ind, n_segments, threshold=threshold
+    ) for ind in pop]
+
+    sorted_pop = [ind for _, ind in sorted(
+        zip(fitnesses, pop), key=lambda pair: pair[0]
+    )]
+
+    return sorted_pop[int(len(pop) * r):]
+
+
+#
+def generate_new_pop(filtered_pop):
+    return
