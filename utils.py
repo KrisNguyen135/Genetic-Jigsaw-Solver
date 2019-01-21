@@ -3,8 +3,8 @@ import numpy as np
 # seed = 0 when N_SEGMENTS = 2 to get perfect solution
 # seed = 13 when N_SEGMENTS = 3 to get a solution with a pair of matched pieces
 np.random.seed(0)
-#import skimage
-#import matplotlib.pyplot as plt
+import skimage
+import matplotlib.pyplot as plt
 import random
 
 
@@ -72,7 +72,6 @@ def generate_init_pop(piece_edges, n_segments, pop_size=100):
     return pop
 
 
-# TODO: test to see if the same results as v1 can be produced (in main)
 # returns a random initial population
 # each individual contains a tuple of:
 # - indices of the pieces in matrix format
@@ -130,7 +129,6 @@ def get_fitness(ind, n_segments):
     return horizontal_fitness_matrix, vertical_fitness_matrix
 
 
-# TODO: test to see if the same results as v1 can be produced (in main)
 # returns two 2d-arrays (matrices) holding differences between adjacent pieces
 # in an individual in a given population
 # first matrix has `n_segments` rows and `n_segments - 1` columns, holding
@@ -141,9 +139,20 @@ def get_fitness_v2(piece_edges, ind, n_segments):
         return np.sum((edge1 - edge2) ** 2)
 
     ind_piece_edges = []
-    for piece_id, orientation in zip(ind[0], ind[1]):
-        ind_piece_edges.append(
-            np.roll(piece_edges[piece_id], orientation, axis=0))
+
+    indices, orientations = ind
+
+    for row in range(n_segments):
+        for col in range(n_segments):
+            piece_id = indices[row, col]
+            ind_piece_edges.append(
+                np.roll(piece_edges[piece_id], orientations[piece_id], axis=0))
+
+    ind_piece_edges = np.array(ind_piece_edges).reshape(
+        (n_segments, n_segments, 4, -1))
+
+    print('Version 2 piece-edge array:')
+    print(ind_piece_edges)
 
     horizontal_fitness_matrix = np.zeros((n_segments, n_segments - 1))
     vertical_fitness_matrix = np.zeros((n_segments - 1, n_segments))
@@ -158,7 +167,7 @@ def get_fitness_v2(piece_edges, ind, n_segments):
     return horizontal_fitness_matrix, vertical_fitness_matrix
 
 
-# drawing the pieces in the order and rotation specified in an individual
+# draws the pieces in the order and rotation specified in an individual
 def visualize(pieces, ind, n_segments):
     piece_indices = ind[1]
     rotations = ind[2]
@@ -177,6 +186,31 @@ def visualize(pieces, ind, n_segments):
                 cmap='gray')
             ax[i, j].set_xticklabels([])
             ax[i, j].set_yticklabels([])
+
+    plt.tight_layout()
+    plt.show()
+
+
+# draws the pieces in the order and orientation specified in an individual
+def visualize_v2(pieces, ind, n_segments):
+    indices, orientations = ind
+
+    print(indices)
+    print(orientations)
+
+    f, ax = plt.subplots(n_segments, n_segments, figsize=(5, 5))
+
+    for row in range(n_segments):
+        for col in range(n_segments):
+            ax[row, col].imshow(
+                skimage.transform.rotate(
+                    pieces[indices[row, col]],
+                    90 * orientations[indices[row, col]]
+                ),
+                cmap='gray'
+            )
+            ax[row, col].set_xticklabels([])
+            ax[row, col].set_yticklabels([])
 
     plt.tight_layout()
     plt.show()
@@ -235,7 +269,7 @@ def get_ind_stats(ind, threshold, n_segments, fitness_matrix_pair=None):
     cluster_matrix = np.zeros((n_segments, n_segments), dtype=int)
 
     # initializing the match-orientation array
-    piece_indices = ind[1]
+    piece_indices = ind[0]
     match_orientations = np.array([
         np.array([None for _ in range(4)]) for __ in range(piece_indices.size)
     ])
@@ -824,7 +858,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         return combine_clusters()
 
     # generating stats for both parents
-    parent1_piece_indices, parent1_orientations = parent1[1], parent1[2]
+    parent1_piece_indices, parent1_orientations = parent1
 
     parent1_test_fitness_matrix_pair = (np.array([
         [10, 1],
@@ -839,10 +873,10 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         parent1_cluster_to_piece_set, parent1_match_orientations\
         = get_ind_stats(
             parent1, threshold, n_segments,
-            fitness_matrix_pair = parent1_test_fitness_matrix_pair
+            fitness_matrix_pair=parent1_test_fitness_matrix_pair
         )
 
-    parent2_piece_indices, parent2_orientations = parent2[1], parent2[2]
+    parent2_piece_indices, parent2_orientations = parent2
 
     parent2_test_fitness_matrix_pair = (np.array([
         [10, 10],
@@ -879,7 +913,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         parent2_cluster_to_piece_set, parent2_match_orientations\
         = get_ind_stats(
             parent2, threshold, n_segments,
-            fitness_matrix_pair = parent2_test_fitness_matrix_pair
+            fitness_matrix_pair=parent2_test_fitness_matrix_pair
         )
 
     print_parents_info()

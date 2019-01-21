@@ -51,49 +51,49 @@ if __name__ == '__main__':
     print()'''
 
     # testing generate_offspring() function
-    parent1 = (None, np.array([
+    parent1 = (np.array([
         [4, 3, 0],
         [5, 6, 1],
         [2, 8, 7]
     ]), np.array([1, 1, 0, 1, 0, 0, 0, 3, 0]))
 
     # non-conflicting case
-    parent2 = (None, np.array([
+    parent2 = (np.array([
         [1, 0, 6],
         [4, 2, 5],
         [7, 3, 8]
     ]), np.array([2, 1, 3, 0, 0, 3, 3, 0, 2]))
 
     # mergeable case
-    '''parent2 = (None, np.array([
+    '''parent2 = (np.array([
         [3, 4, 6],
         [2, 5, 8],
         [1, 7, 0]
     ]), np.array([0, 3, 3, 2, 0, 1, 0, 1, 0]))'''
 
     # conflicting case
-    '''parent2 = (None, np.array([
+    '''parent2 = (np.array([
         [3, 8, 7],
         [0, 2, 6],
         [4, 1, 5]
     ]), np.array([0, 1, 2, 3, 0, 0, 0, 0, 3]))'''
 
     # mergeable multiple common pieces case
-    '''parent2 = (None, np.array([
+    '''parent2 = (np.array([
         [1, 2, 6],
         [0, 8, 5],
         [3, 7, 4]
     ]), np.array([0, 3, 2, 0, 0, 1, 2, 2, 0]))'''
 
     # large cluster case 1
-    '''parent2 = (None, np.array([
+    '''parent2 = (np.array([
         [2, 7, 4],
         [6, 8, 5],
         [3, 1, 0]
     ]), np.array([0, 0, 2, 3, 1, 1, 0, 1, 1]))'''
 
     # large cluster case 2
-    '''parent2 = (None, np.array([
+    '''parent2 = (np.array([
         [0, 3, 1],
         [7, 4, 6],
         [8, 5, 2]

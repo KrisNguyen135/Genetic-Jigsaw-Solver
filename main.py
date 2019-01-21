@@ -40,7 +40,7 @@ if __name__ == '__main__':
     # testing unshuffled image
     # switch the code that generates the puzzle when uncomment this part
     '''ind = (
-        piece_edges,
+        piece_edges.reshape((N_SEGMENTS, N_SEGMENTS, 4, -1)),
         np.arange(N_SEGMENTS ** 2).reshape((N_SEGMENTS, N_SEGMENTS)),
         np.zeros((N_SEGMENTS * N_SEGMENTS,), dtype=int)
     )
