@@ -991,6 +991,15 @@ def filter_pop(piece_edges, pop, threshold, n_segments, r=0.5):
     return sorted_pop[int(len(pop) * r):]
 
 
-#
-def generate_new_pop(filtered_pop):
+# generates a new population from a filtered one
+# `random_r` specifies the ratio (portion) of the new population
+# that will be generated randomly
+# (and not from the parameter filtered population)
+def generate_new_pop(piece_edges, filtered_pop, threshold, n_segments, pop_size=100, random_r=0.5):
+    pop = []
+
+    for _ in range(pop_size):
+        parent1, parent2 = random.sample(filtered_pop, 2)
+
+
     return

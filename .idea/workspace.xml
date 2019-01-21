@@ -2,9 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ee30eecc-a9fa-4bda-ab84-4bd996695f66" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/__pycache__/utils.cpython-37.pyc" beforeDir="false" afterPath="$PROJECT_DIR$/__pycache__/utils.cpython-37.pyc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -76,8 +73,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/utils.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="129">
-                  <caret line="996" lean-forward="true" selection-start-line="996" selection-end-line="996" />
+                <state relative-caret-position="107">
+                  <caret line="1003" lean-forward="true" selection-start-line="1003" selection-end-line="1003" />
                 </state>
               </provider>
             </entry>
@@ -110,6 +107,7 @@
       <find>version 2</find>
       <find>generate_th</find>
       <find>get_fitness</find>
+      <find>sample</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -322,12 +320,12 @@
       <workItem from="1547924925527" duration="8431000" />
       <workItem from="1547939357908" duration="3885000" />
       <workItem from="1548018041883" duration="4560000" />
-      <workItem from="1548095328456" duration="8041000" />
+      <workItem from="1548095328456" duration="8701000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="51950000" />
+    <option name="totallyTimeSpent" value="52610000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -436,8 +434,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="129">
-          <caret line="996" lean-forward="true" selection-start-line="996" selection-end-line="996" />
+        <state relative-caret-position="107">
+          <caret line="1003" lean-forward="true" selection-start-line="1003" selection-end-line="1003" />
         </state>
       </provider>
     </entry>
