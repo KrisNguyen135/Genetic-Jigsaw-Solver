@@ -618,6 +618,9 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
                             piece_id, row, col + 1, 3
                         )
 
+                    if recur_insert_result == -1:
+                        return -1
+
                     '''print(f'{piece_id}, ({row}, {col}) returning:')
                     print(overall_row_change + recur_insert_result[0],
                           overall_col_change + recur_insert_result[1])'''
@@ -649,31 +652,6 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
             print(piece_orientation)
             print('\nChild subjective match-orientation array:')
             print(child_subjective_match_orientations)'''
-
-            # custom way to insert pieces
-            # for testing
-            '''print('\nCurrent arrangement:')
-            print(indices)
-            print('\nRemaining pieces:')
-            print(remain_piece_set)
-            print(recur_insert_piece(0, 2, 1, 0))
-
-            print('\nCurrent arrangement:')
-            print(indices)
-            print('\nRemaining pieces:')
-            print(remain_piece_set)
-            print(recur_insert_piece(2, 1, 0, 0))
-
-            print('\nCurrent arrangement:')
-            print(indices)
-            print('\nRemaining pieces:')
-            print(remain_piece_set)
-            print(recur_insert_piece(4, 0, 1, 0))
-
-            print('\nFinal arrangement:')
-            print(indices)
-            print('\nRemaining pieces:')
-            print(remain_piece_set)'''
 
             # start inserting pieces in order of cluster
             for piece_id in range(n_segments * n_segments):
@@ -760,8 +738,8 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
                                 piece_cluster_id[i] \
                                     = piece_cluster_id[piece_id]
 
-        print('\nPiece-wise cluster id array:')
-        print(piece_cluster_id)
+        #print('\nPiece-wise cluster id array:')
+        #print(piece_cluster_id)
 
         # generating necessary data structures
         cluster_id_set = set(piece_cluster_id)
@@ -776,8 +754,8 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
                 else:
                     cluster_to_piece_set[temp_cluster_id].add(piece_id)
 
-        print('Cluster to piece set:')
-        print(cluster_to_piece_set)
+        #print('Cluster to piece set:')
+        #print(cluster_to_piece_set)
 
         # generating a random solution while preserving good matches
         return combine_clusters()
@@ -803,7 +781,7 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
 
     parent2_piece_indices, parent2_orientations = parent2[1], parent2[2]
 
-    '''parent2_test_fitness_matrix_pair = (np.array([
+    parent2_test_fitness_matrix_pair = (np.array([
         [10, 10],
         [10, 0], # non-conflicting case
         #[10, 10], # mergeable and conflicting cases
@@ -812,17 +790,27 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
         [10, 10, 10],
         [1, 10, 10] # non-conflicting and mergeable cases
         #[1.6, 10, 10] # conflicting case
-    ]))  # used for testing'''
+    ]))  # used for testing
 
-    # large cluster case
-    parent2_test_fitness_matrix_pair = (np.array([
+    # large cluster case 1
+    '''parent2_test_fitness_matrix_pair = (np.array([
         [10, 1],
         [10, 0],
         [10, 10]
     ]), np.array([
         [10, 0.5, 0],
         [10, 10, 10]
-    ]))  # used for testing
+    ]))  # used for testing'''
+
+    # large cluster case 2
+    '''parent2_test_fitness_matrix_pair = (np.array([
+        [10, 10],
+        [1, 10],
+        [0, 0]
+    ]), np.array([
+        [10, 10, 10],
+        [0.5, 0, 10]
+    ]))  # used for testing'''
 
     parent2_cluster_matrix, parent2_cluster_id_set, parent2_cluster_fitnesses,\
         parent2_cluster_to_piece_set, parent2_match_orientations\
@@ -917,11 +905,18 @@ def generate_offspring(parent1, parent2, threshold, n_segments):
     print('======Child objective match-orientation array======')
     print(child_objective_match_orientations)
 
-    indices, orientations = generate_child(child_objective_match_orientations)
+    child_result = -1
+
+    while child_result == -1:
+        child_result = generate_child(child_objective_match_orientations)
+
+    '''indices, orientations = child_result
 
     print('Generated child indices:')
     print(indices)
     print('Generated child orientations:')
     print(orientations)
 
-    return indices, orientations
+    return indices, orientations'''
+
+    return child_result

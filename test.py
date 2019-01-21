@@ -86,11 +86,25 @@ if __name__ == '__main__':
         [3, 7, 4]
     ]), np.array([0, 3, 2, 0, 0, 1, 2, 2, 0]))'''
 
-    # large cluster case
-    parent2 = (None, np.array([
+    # large cluster case 1
+    '''parent2 = (None, np.array([
         [2, 7, 4],
         [6, 8, 5],
         [3, 1, 0]
-    ]), np.array([0, 0, 2, 3, 1, 1, 0, 1, 1]))
+    ]), np.array([0, 0, 2, 3, 1, 1, 0, 1, 1]))'''
 
-    generate_offspring(parent1, parent2, 2, N_SEGMENTS)
+    # large cluster case 2
+    '''parent2 = (None, np.array([
+        [0, 3, 1],
+        [7, 4, 6],
+        [8, 5, 2]
+    ]), np.array([0, 3, 1, 2, 1, 1, 0, 1, 1]))'''
+
+    child_indices, child_orientations = generate_offspring(
+        parent1, parent2, 2, N_SEGMENTS)
+
+    print('=====Generated child info=====')
+    print('Child indices:')
+    print(child_indices)
+    print('Child orientations:')
+    print(child_orientations)

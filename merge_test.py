@@ -446,7 +446,7 @@ if __name__ == '__main__':
         [None, None, None, None]
     ])
 
-    # large cluster case
+    # large cluster case 1
     '''child_objective_match_orientations = np.array([
         [None, (1, 0), (3, 1), None],
         [None, None, None, (0, 0)],
@@ -459,7 +459,26 @@ if __name__ == '__main__':
         [(5, 0), None, None, (7, 0.5)]
     ])'''
 
-    indices, orientations = generate_child(child_objective_match_orientations)
+    # large cluster case 2
+    child_objective_match_orientations = np.array([
+        [None, (1, 0), (3, 1), None],
+        [None, None, None, (0, 0)],
+        [None, None, (5, 0), None],
+        [(0, 1), None, None, None],
+        [None, (5, 0), (7, 1), None],
+        [(2, 0), None, (8, 0), (4, 0)],
+        [None, None, None, None],
+        [(4, 1), (8, 0.5), None, None],
+        [(5, 0), None, None, (7, 0.5)]
+    ])
+
+    child_result = -1
+
+    while child_result == -1:
+        print('Generating a child again...')
+        child_result = generate_child(child_objective_match_orientations)
+
+    indices, orientations = child_result
 
     print(indices)
     print(orientations)
