@@ -65,18 +65,14 @@ if __name__ == '__main__':
     visualize(pieces, second_best_ind, N_SEGMENTS)'''
 
     # generating a starting population
-    old_pop = generate_init_pop_v2(N_SEGMENTS)
+    old_pop = generate_init_pop_v2(N_SEGMENTS, pop_size=200)
 
-    filtered_pop = filter_pop(piece_edges, old_pop, threshold, N_SEGMENTS)
-    print(f'Population filtered down to {len(filtered_pop)} individuals.')
+    sorted_pop = get_sorted_pop(piece_edges, old_pop, threshold, N_SEGMENTS)
 
     '''print('======Testing first individual======')
-    parent1 = filtered_pop[-1]
+    parent1 = sorted_pop[-1]
     print(parent1[0])
     print(parent1[1])
-    print('Number of good matches:')
-    print(get_fitness_v2(
-        piece_edges, parent1, N_SEGMENTS, threshold=threshold))
     parent1_fitness_matrix_pair = get_fitness_v2(
         piece_edges, parent1, N_SEGMENTS)
     print(parent1_fitness_matrix_pair[0])
@@ -84,14 +80,36 @@ if __name__ == '__main__':
     visualize_v2(pieces, parent1, N_SEGMENTS)
 
     print('======Testing second individual======')
-    parent2 = filtered_pop[-2]
+    parent2 = sorted_pop[-2]
     print(parent2[0])
     print(parent2[1])
-    print('Number of good matches:')
-    print(get_fitness_v2(
-        piece_edges, parent2, N_SEGMENTS, threshold=threshold))
     parent2_fitness_matrix_pair = get_fitness_v2(
         piece_edges, parent2, N_SEGMENTS)
     print(parent2_fitness_matrix_pair[0])
     print(parent2_fitness_matrix_pair[1])
     visualize_v2(pieces, parent2, N_SEGMENTS)'''
+
+    # inspecting pairs that don't return
+    '''print('Inspecting pairs...')
+    parent1 = sorted_pop[191]
+    parent2 = sorted_pop[163]
+    child = generate_offspring(piece_edges, parent1, parent2, threshold, N_SEGMENTS)
+    print(child)'''
+
+    n_iters = 10
+
+    for i in range(n_iters):
+        print(f'\n======Generating {i}-th population======')
+
+        new_pop = generate_new_pop(piece_edges, sorted_pop, threshold, N_SEGMENTS,
+                                   pop_size=200)
+
+        print('Sorting population...')
+        sorted_pop = get_sorted_pop(piece_edges, new_pop, threshold, N_SEGMENTS)
+
+        best_ind = sorted_pop[-1]
+        print('Best individual fitness matrix pair:')
+        fitness_matrix_pair = get_fitness_v2(piece_edges, best_ind, N_SEGMENTS)
+        print(fitness_matrix_pair[0])
+        print(fitness_matrix_pair[1])
+        visualize_v2(pieces, best_ind, N_SEGMENTS)

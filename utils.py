@@ -133,9 +133,7 @@ def get_fitness(ind, n_segments):
 # in an individual in a given population
 # first matrix has `n_segments` rows and `n_segments - 1` columns, holding
 # differences between horizontally adjacent pieces
-# specify a threshold to have the function return the number of good matches
-# (edge-wise), whose differences are less than or equal to the threshold
-def get_fitness_v2(piece_edges, ind, n_segments, threshold=None):
+def get_fitness_v2(piece_edges, ind, n_segments):
     # simple squares of differences
     def get_difference(edge1, edge2):
         return np.sum((edge1 - edge2) ** 2)
@@ -165,10 +163,6 @@ def get_fitness_v2(piece_edges, ind, n_segments, threshold=None):
                 ind_piece_edges[i, j][2], ind_piece_edges[i + 1, j][0])
             horizontal_fitness_matrix[j, i] = get_difference(
                 ind_piece_edges[j, i][1], ind_piece_edges[j, i + 1][3])
-
-    if threshold is not None:
-        return (horizontal_fitness_matrix <= threshold).sum()\
-               + (vertical_fitness_matrix <= threshold).sum()
 
     return horizontal_fitness_matrix, vertical_fitness_matrix
 
@@ -382,7 +376,13 @@ def get_ind_stats(piece_edges, ind, threshold, n_segments, fitness_matrix_pair=N
 # returns a randomly generated child that preserves all good
 # matches from each parent and attempts to merge any mergeable
 # clusters
-def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments):
+#
+# low standard of threshold might lead to clusters too large to fit in
+# a solution, which would otherwise make the function hang
+# if the function can't return after a specific number of tries
+# (specified by `tolerance`), then it will return -1
+def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments,
+                       tolerance=10):
 
     # precondition: intersection is not empty
     # returns True if there is a real conflict
@@ -429,7 +429,8 @@ def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments):
     # takes in a child's objective match-orientation array and
     # returns a random solution that preserves all good clusters
     # in the form of (indices, orientations)
-    def generate_child(child_objective_match_orientations):
+    def generate_child(child_objective_match_orientations,
+                       parent1_orientations, parent2_orientations):
 
         def combine_clusters():
             # nonlocal variables for the solution
@@ -711,7 +712,7 @@ def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments):
             child_subjective_match_orientations = []
             for i, match_orientation in enumerate(child_objective_match_orientations):
                 child_subjective_match_orientations.append(np.roll(
-                    match_orientation, piece_orientation[i]
+                    match_orientation, piece_orientation[i] + parent1_orientations[i]
                 ))
 
             child_subjective_match_orientations = np.array(child_subjective_match_orientations)
@@ -736,9 +737,9 @@ def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments):
 
                     while remain_locations and recur_insert_result == -1:
                         '''print('\nCurrent arrangement:')
-                        print(indices)
+                        print(saved_indices)
                         print('\nRemaining pieces:')
-                        print(remain_piece_set)
+                        print(saved_remain_piece_set)
                         print('\nRemaining locations:')
                         print(remain_locations)'''
 
@@ -749,9 +750,9 @@ def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments):
                         indices = np.copy(saved_indices)
                         remain_piece_set = saved_remain_piece_set.copy()
 
-                        # print(f'\nAttempting to insert Piece {piece_id} in ({row}, {col})')
+                        #print(f'\nAttempting to insert Piece {piece_id} in ({row}, {col})')
                         recur_insert_result = recur_insert_piece(piece_id, row, col, 0)
-                        # print('Result:', recur_insert_result)
+                        #print('Result:', recur_insert_result)
 
                     if recur_insert_result == -1:
                         return -1
@@ -813,7 +814,7 @@ def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments):
 
         # generating necessary data structures
         cluster_id_set = set(piece_cluster_id)
-        cluster_id_set.remove(0)
+        cluster_id_set.discard(0) # remove if exists
 
         cluster_to_piece_set = {}
         for piece_id in range(n_segments * n_segments):
@@ -848,6 +849,17 @@ def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments):
             piece_edges, parent1, threshold, n_segments#,
             #fitness_matrix_pair=parent1_test_fitness_matrix_pair
         )
+
+    '''print('Parent1 piece indices:')
+    print(parent1[0])
+    print('Parent1 orientations:')
+    print(parent1[1])
+    print('Parent1 cluster matrix:')
+    print(parent1_cluster_matrix)
+    print('Parent1 cluster ID set:')
+    print(parent1_cluster_id_set)
+    print('Parent1 match-orientation array:')
+    print(parent1_match_orientations)'''
 
     parent2_piece_indices, parent2_orientations = parent2
 
@@ -888,6 +900,17 @@ def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments):
             piece_edges, parent2, threshold, n_segments#,
             #fitness_matrix_pair=parent2_test_fitness_matrix_pair
         )
+
+    '''print('Parent2 piece indices:')
+    print(parent2[0])
+    print('Parent2 orientations:')
+    print(parent2[1])
+    print('Parent2 cluster matrix:')
+    print(parent2_cluster_matrix)
+    print('Parent2 cluster ID set:')
+    print(parent2_cluster_id_set)
+    print('Parent2 match-orientation array:')
+    print(parent2_match_orientations)'''
 
     conflicted_clusters = []
 
@@ -930,8 +953,8 @@ def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments):
 
     # transferring match-orientation arrays from parents to child
     child_objective_match_orientations = np.array(
-        [np.array([None for i in range(4)])
-            for j in range(n_segments * n_segments)]
+        [np.array([None for _ in range(4)])
+            for __ in range(n_segments * n_segments)]
     )
 
     for piece_id in range(n_segments * n_segments):
@@ -956,13 +979,20 @@ def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments):
                 child_objective_match_orientations[piece_id][i]\
                     = parent2_objective_orientation[i]
 
-    print('======Child objective match-orientation array======')
-    print(child_objective_match_orientations)
+    #print('======Child objective match-orientation array======')
+    #print(child_objective_match_orientations)
 
     child_result = -1
+    n_iters = 0
 
-    while child_result == -1:
-        child_result = generate_child(child_objective_match_orientations)
+    while child_result == -1 and n_iters < tolerance:
+        try:
+            child_result = generate_child(child_objective_match_orientations,
+                                          parent1_orientations, parent2_orientations)
+        except RecursionError:
+            pass
+
+        n_iters += 1
 
     '''indices, orientations = child_result
 
@@ -976,30 +1006,65 @@ def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments):
     return child_result
 
 
-# omit bad individuals from a population
-# `r` specifies how large the kept portion
-# of the population is
-def filter_pop(piece_edges, pop, threshold, n_segments, r=0.5):
-    fitnesses = [get_fitness_v2(
-        piece_edges, ind, n_segments, threshold=threshold
-    ) for ind in pop]
+# returns a population in a sorted order:
+# better individuals come after worse individuals
+# current standards (in order) of sorting:
+# - number of "good matches" (difference <= threshold)
+# - best (smallest) difference in fitness matrix pair
+# - average difference in fitness matrix pair
+def get_sorted_pop(piece_edges, pop, threshold, n_segments):
+    # fitness matrix pairs
+    fitnesses = [get_fitness_v2(piece_edges, ind, n_segments)
+                 for ind in pop]
 
-    sorted_pop = [ind for _, ind in sorted(
-        zip(fitnesses, pop), key=lambda pair: pair[0]
-    )]
+    # other relevant stats
+    n_good_matches = [(fitness[0] <= threshold).sum()
+                      + (fitness[1] <= threshold).sum()
+                      for fitness in fitnesses]
+    avg_fitnesses = [(fitness[0].mean() + fitness[1].mean()) / 2
+                     for fitness in fitnesses]
+    best_fitnesses = [min(fitness[0].min(), fitness[1].min())
+                      for fitness in fitnesses]
 
-    return sorted_pop[int(len(pop) * r):]
+    sorted_pop = [ind for n_matches, best_fitnesses, avg_fitness, ind in
+                  sorted(zip(n_good_matches, best_fitnesses,
+                             avg_fitnesses, pop
+                             ),
+                         key=lambda x: (x[0], -x[1], -x[2])
+                  )]
+
+    return sorted_pop
 
 
-# generates a new population from a filtered one
+# generates a new population from an existing one
 # `random_r` specifies the ratio (portion) of the new population
 # that will be generated randomly
-# (and not from the parameter filtered population)
-def generate_new_pop(piece_edges, filtered_pop, threshold, n_segments, pop_size=100, random_r=0.5):
+# (and not from the parameter original population)
+def generate_new_pop(piece_edges, sorted_pop, threshold, n_segments,
+                     pop_size=100, random_r=0.2):
+
+    id_dist = [i for i in range(len(sorted_pop)) for _ in range(i)]
+
     pop = []
+    for i in range(int(pop_size * (1 - random_r))):
+        #print(f'\n{i}-th iteration:')
 
-    for _ in range(pop_size):
-        parent1, parent2 = random.sample(filtered_pop, 2)
+        child_result = -1
+        while child_result == -1:
+            id1 = None
+            id2 = None
+            while id1 == id2:
+                id1, id2 = random.sample(id_dist, 2)
+            #print(f'{id1}-th and {id2}-th individuals selected')
 
+            parent1 = sorted_pop[id1]
+            parent2 = sorted_pop[id2]
 
-    return
+            child_result = generate_offspring(
+                piece_edges, parent1, parent2, threshold, n_segments)
+
+        pop.append(child_result)
+
+    pop += generate_init_pop_v2(n_segments, pop_size=pop_size - len(pop))
+
+    return pop
