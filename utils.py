@@ -205,7 +205,7 @@ def visualize_v2(pieces, ind, n_segments):
             ax[row, col].imshow(
                 skimage.transform.rotate(
                     pieces[indices[row, col]],
-                    90 * orientations[indices[row, col]]
+                    -90 * orientations[indices[row, col]]
                 ),
                 cmap='gray'
             )
@@ -430,6 +430,7 @@ def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments,
     # returns a random solution that preserves all good clusters
     # in the form of (indices, orientations)
     def generate_child(child_objective_match_orientations,
+                       parent1_cluster_to_piece_set, parent2_cluster_to_piece_set,
                        parent1_orientations, parent2_orientations):
 
         def combine_clusters():
@@ -699,20 +700,108 @@ def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments,
                     return (overall_row_change + recur_insert_result[0],
                             overall_col_change + recur_insert_result[1])
 
+            def cluster_relative_orientation_check():
+                for piece_id1 in range(n_segments * n_segments - 1):
+                    for piece_id2 in range(piece_id1 + 1, n_segments * n_segments):
+                        child_orientation_d = (piece_orientation[piece_id1] - piece_orientation[piece_id2]) % 4
+
+                        if parent1_piece_to_cluster_id[piece_id1] != 0 \
+                                and parent1_piece_to_cluster_id[piece_id2] != 0 \
+                                and parent1_piece_to_cluster_id[piece_id1] == parent1_piece_to_cluster_id[piece_id2]:
+
+                            parent1_orientation_d = (parent1_orientations[piece_id1]
+                                                     - parent1_orientations[piece_id2]) % 4
+
+                            if parent2_piece_to_cluster_id[piece_id1] != 0 \
+                                    and parent2_piece_to_cluster_id[piece_id2] != 0 \
+                                    and parent2_piece_to_cluster_id[piece_id1] \
+                                    == parent2_piece_to_cluster_id[piece_id2]:
+
+                                parent2_orientation_d = (parent2_orientations[piece_id1]
+                                                         - parent2_orientations[piece_id2]) % 4
+
+                                if parent1_orientation_d != parent2_orientation_d:
+                                    return -1
+
+                            if child_orientation_d != parent1_orientation_d:
+                                #print(f'Conflict between {piece_id1} and {piece_id2} with parent1')
+                                if not piece_check[piece_id2]:
+                                    piece_orientation[piece_id2] = (piece_orientation[piece_id1]
+                                                                    - parent1_orientation_d) % 4
+                                    piece_check[piece_id2] = True
+
+                                elif not piece_check[piece_id1]:
+                                    piece_orientation[piece_id1] = (piece_orientation[piece_id]
+                                                                    + parent1_orientation_d) % 4
+                                    piece_check[piece_id1] = True
+
+                                else:
+                                    return -1
+
+                                return False
+
+                        if parent2_piece_to_cluster_id[piece_id1] != 0 \
+                                and parent2_piece_to_cluster_id[piece_id2] != 0 \
+                                and parent2_piece_to_cluster_id[piece_id1] == parent2_piece_to_cluster_id[piece_id2]:
+
+                            parent2_orientation_d = (parent2_orientations[piece_id1]
+                                                     - parent2_orientations[piece_id2]) % 4
+
+                            if child_orientation_d != parent2_orientation_d:
+                                #print(f'Conflict between {piece_id1} and {piece_id2} with parent2')
+                                if not piece_check[piece_id2]:
+                                    piece_orientation[piece_id2] = (piece_orientation[piece_id1]
+                                                                    - parent2_orientation_d) % 4
+                                    piece_check[piece_id2] = True
+
+                                elif not piece_check[piece_id1]:
+                                    piece_orientation[piece_id1] = (piece_orientation[piece_id]
+                                                                    + parent2_orientation_d) % 4
+                                    piece_check[piece_id1] = True
+
+                                else:
+                                    return -1
+
+                                return False
+
+                return True
+
+
             # generating random orientation for each cluster
             cluster_to_orientation = {
                 cluster_id: np.random.randint(0, 4) for cluster_id in cluster_id_set
             }
             piece_orientation = np.array([
-                cluster_to_orientation[piece_cluster_id[piece_id]] if piece_cluster_id[piece_id] != 0
+                cluster_to_orientation[piece_cluster_id[piece_id]]
+                if piece_cluster_id[piece_id] != 0
                 else np.random.randint(0, 4) for piece_id in range(n_segments * n_segments)
             ])
+
+            # TODO: finish and test
+            # preserving relative orientation for good pieces
+            parent1_piece_to_cluster_id = {}
+            parent2_piece_to_cluster_id = {}
+            for cluster_id, piece_set in parent1_cluster_to_piece_set.items():
+                for piece_id in piece_set:
+                    parent1_piece_to_cluster_id[piece_id] = cluster_id
+            for cluster_id, piece_set in parent2_cluster_to_piece_set.items():
+                for piece_id in piece_set:
+                    parent2_piece_to_cluster_id[piece_id] = cluster_id
+            for piece_id in range(n_segments * n_segments):
+                if piece_id not in parent1_piece_to_cluster_id:
+                    parent1_piece_to_cluster_id[piece_id] = 0
+                if piece_id not in parent2_piece_to_cluster_id:
+                    parent2_piece_to_cluster_id[piece_id] = 0
+
+            piece_check = [False for _ in range(n_segments * n_segments)]
+            while not cluster_relative_orientation_check():
+                continue
 
             # creating the subjective match-orientation array
             child_subjective_match_orientations = []
             for i, match_orientation in enumerate(child_objective_match_orientations):
                 child_subjective_match_orientations.append(np.roll(
-                    match_orientation, piece_orientation[i] + parent1_orientations[i]
+                    match_orientation, piece_orientation[i]
                 ))
 
             child_subjective_match_orientations = np.array(child_subjective_match_orientations)
@@ -987,8 +1076,11 @@ def generate_offspring(piece_edges, parent1, parent2, threshold, n_segments,
 
     while child_result == -1 and n_iters < tolerance:
         try:
-            child_result = generate_child(child_objective_match_orientations,
-                                          parent1_orientations, parent2_orientations)
+            child_result = generate_child(
+                child_objective_match_orientations,
+                parent1_cluster_to_piece_set, parent2_cluster_to_piece_set,
+                parent1_orientations, parent2_orientations
+            )
         except RecursionError:
             pass
 

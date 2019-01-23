@@ -38,7 +38,7 @@ if __name__ == '__main__':
     )
 
     print('Fitness version 1:')
-    print(get_fitness(unshuffled_ind_v1, N_SEGMENTS))
+    print(get_fitness(unshuffled_ind_v1, N_SEGMENTS))'''
 
     unshuffled_ind_v2 = (
         np.arange(N_SEGMENTS * N_SEGMENTS).reshape((N_SEGMENTS, N_SEGMENTS)),
@@ -46,7 +46,11 @@ if __name__ == '__main__':
     )
 
     print('Fitness version 2:')
-    print(get_fitness_v2(piece_edges, unshuffled_ind_v2, N_SEGMENTS))'''
+    fitness_matrix_pair = get_fitness_v2(
+        piece_edges, unshuffled_ind_v2, N_SEGMENTS)
+    print(fitness_matrix_pair[0])
+    print(fitness_matrix_pair[1])
+    visualize_v2(pieces, unshuffled_ind_v2, N_SEGMENTS)
 
     # testing of population-generating functions
     '''pop = generate_init_pop(piece_edges, N_SEGMENTS)
