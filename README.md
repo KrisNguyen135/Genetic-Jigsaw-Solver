@@ -1,6 +1,8 @@
 # Solving Jigsaw Puzzles with a Genetic Algorithm
 
+<p align="center">
 <img src="https://github.com/KrisNguyen135/Genetic-Jigsaw-Solver/blob/master/output/combined.gif" width="600" height="600"/>
+</p>
 
 ## General information
 Jigsaw puzzles are fun! But if you'd like to take the fun out of solving them, it is possible to have computer programs
@@ -16,11 +18,11 @@ also means that the method of matching the cut along the edges of two pieces is 
 pieces are cut in a straight line.
 
 ### Edge-matching
-<p align="center", style="font-size:50%;">
+<p align="center">
 <img src="https://image.slidesharecdn.com/gisconcepts3-091126070346-phpapp01/95/gis-concepts-35-61-728.jpg" width="500" height="400"/>
 </p> 
 
-<p align="center", style="font-size:50%;">
+<p align="center">
 <a href="https://www.slideshare.net/cier/gis-concepts-35">Image source</a>
 </p>
 
