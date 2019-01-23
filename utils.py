@@ -1,11 +1,10 @@
 import numpy as np
-# for testing purposes:
-# seed = 0 when N_SEGMENTS = 2 to get perfect solution
-# seed = 13 when N_SEGMENTS = 3 to get a solution with a pair of matched pieces
-np.random.seed(0)
 import skimage
 import matplotlib.pyplot as plt
 import random
+
+np.random.seed(0)
+random.seed(5)
 
 
 # returns a 1d array of puzzle pieces
@@ -192,13 +191,13 @@ def visualize(pieces, ind, n_segments):
 
 
 # draws the pieces in the order and orientation specified in an individual
-def visualize_v2(pieces, ind, n_segments):
+def visualize_v2(pieces, ind, n_segments, output=None):
     indices, orientations = ind
 
     print(indices)
     print(orientations)
 
-    f, ax = plt.subplots(n_segments, n_segments, figsize=(5, 5))
+    f, ax = plt.subplots(n_segments, n_segments, figsize=(5, 5), gridspec_kw={'wspace': 0, 'hspace': 0})
 
     for row in range(n_segments):
         for col in range(n_segments):
@@ -212,8 +211,12 @@ def visualize_v2(pieces, ind, n_segments):
             ax[row, col].set_xticklabels([])
             ax[row, col].set_yticklabels([])
 
-    plt.tight_layout()
+    #plt.tight_layout()
+    plt.subplots_adjust(wspace=0, hspace=0)
     plt.show()
+
+    if output is not None:
+        f.savefig(output)
 
 
 # calculates all differences between first and seconds layers of each piece
