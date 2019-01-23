@@ -2,15 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ee30eecc-a9fa-4bda-ab84-4bd996695f66" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/__pycache__/main.cpython-37.pyc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/__pycache__/utils.cpython-37.pyc" beforeDir="false" afterPath="$PROJECT_DIR$/__pycache__/utils.cpython-37.pyc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster_relative_orientation_test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/genetic_jigsaw_solver.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/old_main.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version_test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -29,11 +21,23 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="194">
               <caret line="21" column="21" selection-start-line="21" selection-start-column="21" selection-end-line="21" selection-end-column="21" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="135">
+                <caret line="9" column="4" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="4" />
+              </first_editor>
+              <second_editor />
             </state>
           </provider>
         </entry>
@@ -104,12 +108,12 @@
         <option value="$PROJECT_DIR$/merge_test_v2.py" />
         <option value="$PROJECT_DIR$/merge_test.py" />
         <option value="$PROJECT_DIR$/test.py" />
-        <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/version_test.py" />
         <option value="$PROJECT_DIR$/cluster_relative_orientation_test.py" />
         <option value="$PROJECT_DIR$/old_main.py" />
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/utils.py" />
+        <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
   </component>
@@ -303,12 +307,12 @@
       <workItem from="1548181822390" duration="17530000" />
       <workItem from="1548203700064" duration="18000" />
       <workItem from="1548203739362" duration="1903000" />
-      <workItem from="1548264606061" duration="2283000" />
+      <workItem from="1548264606061" duration="3117000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="74396000" />
+    <option name="totallyTimeSpent" value="75230000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -321,8 +325,9 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-1920" y="-73" width="1920" height="977" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.46296296" visible="true" weight="0.28997868" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.46296296" visible="true" weight="0.28997868" />
       <window_info id="Run" order="1" sideWeight="0.537037" side_tool="true" visible="true" weight="0.28997868" />
       <window_info id="Structure" order="2" sideWeight="0.5316456" side_tool="true" weight="0.30444127" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -337,13 +342,13 @@
       <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Docker" order="10" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="11" sideWeight="0.53837955" visible="true" weight="0.20498301" />
+      <window_info anchor="bottom" id="Python Console" order="11" sideWeight="0.53837955" visible="true" weight="0.20498301" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="R Graphics" order="3" />
       <window_info anchor="right" id="R Packages" order="4" />
-      <window_info anchor="right" id="SciView" order="5" visible="true" weight="0.37686568" />
+      <window_info anchor="right" id="SciView" order="5" weight="0.37686568" />
       <window_info anchor="right" id="Database" order="6" />
     </layout>
   </component>
@@ -374,16 +379,6 @@
     <entry file="file://$PROJECT_DIR$/utils/get_ind_stats.py" />
     <entry file="file://$PROJECT_DIR$/merge_test_v2.py" />
     <entry file="file://$PROJECT_DIR$/merge_test.py" />
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="100">
-            <caret line="8" column="83" selection-start-line="8" selection-start-column="83" selection-end-line="8" selection-end-column="83" />
-          </first_editor>
-          <second_editor />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-511">
@@ -438,6 +433,16 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="194">
           <caret line="21" column="21" selection-start-line="21" selection-start-column="21" selection-end-line="21" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="135">
+            <caret line="9" column="4" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="4" />
+          </first_editor>
+          <second_editor />
         </state>
       </provider>
     </entry>
