@@ -35,9 +35,10 @@ have relatively similar edges together.
 Say we were to implement a simply brute-force approach to solving a jigsaw puzzle. This means generating all possible
 assignments of the individual pieces.
 
-If the original image is cut into $n$ <img src="https://latex.codecogs.com/gif.latex?n/> segments along each edge, we will have $n^2$ individual pieces in total, which
-will lead to $(n^2)!$ possible assignments. Furthermore, in a given assignment, each piece can be placed in exactly four
-different ways, multiplying the number of potential solutions by $4^{n^2}$.
+If the original image is cut into $n$ ![equation](https://latex.codecogs.com/gif.latex?n) segments along each edge, we
+will have $n^2$ individual pieces in total, which will lead to $(n^2)!$ possible assignments. Furthermore, in a given
+assignment, each piece can be placed in exactly four different ways, multiplying the number of potential solutions by
+$4^{n^2}$.
 
 Let's call the function of the total number of possible assignments of a puzzle cut into $n$ segments along each edge
 $f(n)$. We then have:
