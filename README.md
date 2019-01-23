@@ -1,6 +1,8 @@
 # Solving Jigsaw Puzzles with a Genetic Algorithm
 
-## Introduction
+<img src="https://github.com/KrisNguyen135/Genetic-Jigsaw-Solver/blob/master/output/combined.gif" width="600" height="600"/>
+
+## General information
 Jigsaw puzzles are fun! But if you'd like to take the fun out of solving them, it is possible to have computer programs
 to solve them for you.
 
@@ -35,31 +37,38 @@ have relatively similar edges together.
 Say we were to implement a simply brute-force approach to solving a jigsaw puzzle. This means generating all possible
 assignments of the individual pieces.
 
-If the original image is cut into $n$ ![equation](https://latex.codecogs.com/gif.latex?n) segments along each edge, we
-will have $n^2$ individual pieces in total, which will lead to $(n^2)!$ possible assignments. Furthermore, in a given
+If the original image is cut into ![equation](https://latex.codecogs.com/gif.latex?n) segments along each edge, we will
+have ![equation](https://latex.codecogs.com/gif.latex?n%5E2) individual pieces in total, which will lead to
+![equation](https://latex.codecogs.com/gif.latex?%28n%5E2%29%21) possible assignments. Furthermore, in a given
 assignment, each piece can be placed in exactly four different ways, multiplying the number of potential solutions by
-$4^{n^2}$.
+![equation](https://latex.codecogs.com/gif.latex?4%5E%7B%28n%5E2%29%7D).
 
-Let's call the function of the total number of possible assignments of a puzzle cut into $n$ segments along each edge
-$f(n)$. We then have:
+Let's call the function of the total number of possible assignments of a puzzle cut into
+![equation](https://latex.codecogs.com/gif.latex?n) segments along each edge
+![equation](https://latex.codecogs.com/gif.latex?f%28n%29). We then have:
 
-$$f(n) = (n^2)! * 4^{n^2}$$
+![equation](https://latex.codecogs.com/gif.latex?f%28n%29%20%3D%20%28n%5E2%29%21%20*%204%5E%7Bn%5E2%7D)
 
-With a simple 2-by-2 puzzle, we have: $f(2) = 6,144$
+With a simple 2-by-2 puzzle, we have: ![equation](https://latex.codecogs.com/gif.latex?f%282%29%20%3D%206%2C144)
 
-Increasing the number of segment by one, we have: $f(3) = 95,126,814,720$
+Increasing the number of segments by one, we have:
+![equation](https://latex.codecogs.com/gif.latex?f%283%29%20%3D%2095%2C126%2C814%2C720)
 
 Clearly a simply brute-force approach is not viable.
 
-## Methodologies
+With a genetic algorithm, we can selectively find good matches among a population of randomly generated assignments at
+the beginning. Then these good matches will be preserved and combined with newly-found good matches in future
+populations. The complete solution is found when there are enough good matches.
 
 ## Future improvements
 
 - More thorough analysis on the optimal way to calculate threshold for good matches
-- Optimizing the calculation of fitness (maybe use the cluster matrix during)
 - Implementing concurrency to improve execution time
 - Comparing between using grayscale and not using grayscale
 
 ## References
 
 [1] Foxworthy, Tyler. _Solving Jigsaw Puzzles with Genetic Algorithms_. [www.youtube.com/watch?v=6DohBytdf6I](https://www.youtube.com/watch?v=6DohBytdf6I)
+
+[2] Sholomon, Dror, Omid E. David, and Nathan S. Netanyahu. "An automatic solver for very large jigsaw puzzles using
+genetic algorithms." Genetic Programming and Evolvable Machines 17.3 (2016): 291-313.
