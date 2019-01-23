@@ -16,9 +16,11 @@ pieces are cut in a straight line.
 ### Edge-matching
 <p align="center", style="font-size:50%;">
 <img src="https://image.slidesharecdn.com/gisconcepts3-091126070346-phpapp01/95/gis-concepts-35-61-728.jpg" width="500" height="400"/>
-
-Source: [https://www.slideshare.net/cier/gis-concepts-35](https://www.slideshare.net/cier/gis-concepts-35)
 </p> 
+
+<p align="center", style="font-size:50%;">
+<a href="https://www.slideshare.net/cier/gis-concepts-35">Image source</a>
+</p>
 
 Specifically, to see how well two given pieces of the puzzle match horizontally (as indicated in the image above), we
 can calculate the difference between the last column of the matrix that represents the piece on the left, and the first
@@ -33,7 +35,7 @@ have relatively similar edges together.
 Say we were to implement a simply brute-force approach to solving a jigsaw puzzle. This means generating all possible
 assignments of the individual pieces.
 
-If the original image is cut into $n$ segments along each edge, we will have $n^2$ individual pieces in total, which
+If the original image is cut into $n$ <img src="https://latex.codecogs.com/gif.latex?n/> segments along each edge, we will have $n^2$ individual pieces in total, which
 will lead to $(n^2)!$ possible assignments. Furthermore, in a given assignment, each piece can be placed in exactly four
 different ways, multiplying the number of potential solutions by $4^{n^2}$.
 
